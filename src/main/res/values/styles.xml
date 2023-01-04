@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomBottomSheet" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <!-- Customize your theme here. -->
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="bottomSheetStyle">@style/ModelBottomSheetStyle</item>
+    </style>
+    <style name="ModelBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <!-- Customize your theme here. -->
+        <item name="backgroundTint">@color/white</item>
+<!--        <item name="android:layout_marginLeft">10dp</item>-->
+<!--        <item name="android:layout_marginRight">10dp</item>-->
+        <item name="shapeAppearance">@style/ShapeAppearance.App.LargeComponent</item>
+    </style>
+    <style name="ShapeAppearance.App.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+</resources>
