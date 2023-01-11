@@ -1,6 +1,6 @@
 package com.babble.babblesdk
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity
 import com.babble.babblesdk.utils.BabbleSdkHelper
 
 
@@ -11,10 +11,10 @@ class BabbleSDK(activity: AppCompatActivity) {
 
 
     companion object {
-        lateinit var instance: BabbleSDK
+        private lateinit var instance: BabbleSDK
         fun init(activity: AppCompatActivity, apiKey: String) {
             instance = BabbleSDK(activity)
-            if (!apiKey.isEmpty()) {
+            if (apiKey.isNotEmpty()) {
                 BabbleSDKController.getInstance(instance.activity!!)
                     ?.init(apiKey)
             } else {

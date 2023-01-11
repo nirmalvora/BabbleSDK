@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.fragments.BabbleQueFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
+        <TextView
+            android:id="@+id/survey_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/field_padding"
+            android:layout_marginTop="@dimen/field_padding"
+            android:layout_marginEnd="@dimen/field_padding"
+            android:text="@string/hello_blank_fragment"
+            android:visibility="gone"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@color/txtblack" />
+
+        <TextView
+            android:layout_below="@+id/survey_title"
+            android:id="@+id/survey_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/field_padding"
+            android:layout_marginTop="@dimen/field_padding"
+            android:layout_marginEnd="@dimen/field_padding"
+            android:layout_marginBottom="@dimen/field_padding"
+            android:text="@string/hello_blank_fragment"
+            android:visibility="gone"
+            android:textColor="@color/txtblack" />
+
+        <RelativeLayout
+            android:id="@+id/option_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/field_padding"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/survey_options_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:padding="0.5dp" />
+
+            <TextView
+                android:id="@+id/ratings_not_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/survey_options_list"
+                android:layout_marginTop="@dimen/field_padding"
+                android:text=""
+                android:textColor="@color/txtgray"
+                android:textSize="@dimen/page_sub_header_4" />
+
+            <TextView
+                android:id="@+id/ratings_full_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/survey_options_list"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/field_padding"
+                android:text=""
+                android:textColor="@color/txtgray"
+                android:textSize="@dimen/page_sub_header_4" />
+
+        </RelativeLayout>
+
+        <include
+            android:id="@+id/btn_layout"
+            layout="@layout/buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+</androidx.core.widget.NestedScrollView>

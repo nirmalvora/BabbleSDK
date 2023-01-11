@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorPrimaryDark">#5D5FEF</color>
     <color name="white">#FFFFFF</color>
+    <color name="full_transparancy">#00000000</color>
+    <color name="txtblack">#000000</color>
+    <color name="btn_pressed">#8789ed</color>
+    <color name="btn_focused">#8789ed</color>
+    <color name="btn_normal">#5D5FEF</color>
+    <color name="ratings_focused">#C4C4C4</color>
+    <color name="txtgray">#50555C</color>
+    <color name="new_theme_gray">#F3F3F3</color>
+    <color name="txtlightgray">#aaaaaa</color>
 </resources>

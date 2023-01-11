@@ -1,4 +1,8 @@
 <resources>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="smileyHtml1">&#128543;</string>
+    <string name="smileyHtml2">&#128577;</string>
+    <string name="smileyHtml3">&#128528;</string>
+    <string name="smileyHtml4">&#128578;</string>
+    <string name="smileyHtml5">&#128522;</string>
 </resources>

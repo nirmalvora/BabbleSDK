@@ -3,7 +3,7 @@ package com.babble.babblesdk.utils
 import android.util.Log
 import com.babble.babblesdk.TAG
 
-object BabbleSdkHelper {
+internal object BabbleSdkHelper {
     fun initializationFailed() {
         Log.e(TAG, "Initialization failed")
     }
