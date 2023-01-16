@@ -14,7 +14,7 @@ internal class MainActivity : AppCompatActivity() {
         setContentView(view)
         BabbleSDK.init(this, "xyz123")
         binding.openSurvey.setOnClickListener {
-            BabbleSDK.triggerSurvey("new_test_trigger")
+            BabbleSDK.triggerSurvey("1mrazt7auzo")
         }
     }
 }

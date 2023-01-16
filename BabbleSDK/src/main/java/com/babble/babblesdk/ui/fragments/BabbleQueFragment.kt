@@ -1,6 +1,7 @@
 package com.babble.babblesdk.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,27 +11,25 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.babble.babblesdk.adapter.BabbleSurveyAdapter
 import com.babble.babblesdk.databinding.FragmentBabbleQueBinding
-import com.babble.babblesdk.model.getQuestionModel.Fields
-import com.babble.babblesdk.model.getQuestionModel.QuestionResponse
+import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
 
 internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
     private lateinit var binding: FragmentBabbleQueBinding
-    private var fields: Fields? = null
     private var dashboardAdapter: BabbleSurveyAdapter? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentBabbleQueBinding.inflate(inflater, container, false)
-        fields = questionData.document?.fields
-        val questionText = fields?.questionText?.stringValue ?: ""
-        val ratingsFullLike = fields?.maxValDescription?.stringValue ?: ""
-        val ratingsNotLike = fields?.minValDescription?.stringValue ?: ""
-        val questionDesc = fields?.questionDesc?.stringValue ?: ""
-        val buttonText = fields?.ctaText?.stringValue ?: ""
+        val questionText = questionData.questionText ?: ""
+        val ratingsFullLike = questionData.maxValDescription ?: ""
+        val ratingsNotLike = questionData.minValDescription ?: ""
+        val questionDesc = questionData.questionDesc ?: ""
+        val buttonText = questionData.ctaText ?: ""
         binding.btnLayout.nextButton.setOnClickListener {
-            surveyActivity!!.addUserResponse(questionData.document?.fields)
+            surveyActivity!!.addUserResponse(questionData)
         }
         binding.surveyTitle.text = questionText
         binding.surveySubTitle.text = questionDesc
@@ -45,14 +44,14 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.ratingsNotLike.visibility = getVisibility(ratingsNotLike)
 
         val mLayoutManager: RecyclerView.LayoutManager =
-            when (fields?.questionTypeId?.integerValue ?: "9") {
-                "1", "2" -> {
+            when (questionData.questionTypeId ?: 9) {
+                1, 2 -> {
                     LinearLayoutManager(activity)
                 }
-                "4" -> {
+                4 -> {
                     GridLayoutManager(activity, 10)
                 }
-                "5", "7", "8" -> {
+                5, 7, 8 -> {
                     GridLayoutManager(activity, 5)
                 }
                 else -> {
@@ -61,7 +60,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
             }
         dashboardAdapter = BabbleSurveyAdapter(
             requireActivity(),
-            fields!!, this
+            questionData, this
         )
         binding.surveyOptionsList.layoutManager = mLayoutManager
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
@@ -77,58 +76,50 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: QuestionResponse) =
+        fun newInstance(param1: Questions) =
             BabbleQueFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(QUESTION_DATA, param1)
+                    putSerializable(BabbleConstants.questionData, param1)
                 }
             }
     }
 
     override fun itemClicked(position: Int) {
-        when (fields?.questionTypeId?.integerValue ?: "9") {
-            "1" -> {
-                fields?.answers?.arrayValue?.values?.get(position)?.selected =
-                    !(fields?.answers?.arrayValue?.values?.get(position)?.selected ?: false)
-            }
-            "2" -> {
-                fields?.answers?.arrayValue?.values?.forEach {
-                    it.selected = false
+        when (questionData.questionTypeId ?: 9) {
+            1 -> {
+                if(questionData.selectedOptions.contains(questionData.answers[position])){
+                    questionData.selectedOptions.remove(questionData.answers[position])
+                }else{
+                    questionData.selectedOptions.add(questionData.answers[position])
+
                 }
-                fields?.answers?.arrayValue?.values?.get(position)?.selected =
-                    !(fields?.answers?.arrayValue?.values?.get(position)?.selected ?: false)
             }
-            "4", "5", "7", "8" -> {
-                if (fields?.selectedRating == (position + 1)) {
-                    fields?.selectedRating = null
+            2 -> {
+                questionData.selectedOptions= arrayListOf()
+                questionData.selectedOptions.add(questionData.answers[position])
+            }
+            4, 5, 7, 8 -> {
+                if (questionData.selectedRating == (position + 1)) {
+                    questionData.selectedRating = null
                 } else {
-                    fields?.selectedRating = (position + 1)
+                    questionData.selectedRating = (position + 1)
                 }
             }
         }
-        dashboardAdapter!!.notifyMyList(fields!!)
+        dashboardAdapter!!.notifyMyList(questionData)
         checkIfNextButtonEnabled()
     }
 
     private fun checkIfNextButtonEnabled() {
-        when (fields?.questionTypeId?.integerValue ?: "9") {
-            "1" -> {
-                val isEnabled = fields?.answers?.arrayValue?.values?.any {
-                    it.selected
-                }
-                binding.btnLayout.nextButton.isEnabled = isEnabled ?: false
-                binding.btnLayout.nextButton.isClickable = isEnabled ?: false
+        when (questionData.questionTypeId ?: 9) {
+            1, 2 -> {
+                val isEnabled = questionData.selectedOptions.size!=0
+                binding.btnLayout.nextButton.isEnabled = isEnabled
+                binding.btnLayout.nextButton.isClickable = isEnabled
             }
-            "2" -> {
-                val isEnabled = fields?.answers?.arrayValue?.values?.any {
-                    it.selected
-                }
-                binding.btnLayout.nextButton.isEnabled = isEnabled ?: false
-                binding.btnLayout.nextButton.isClickable = isEnabled ?: false
-            }
-            "4", "5", "7", "8" -> {
-                binding.btnLayout.nextButton.isEnabled = fields?.selectedRating != null
-                binding.btnLayout.nextButton.isClickable = fields?.selectedRating != null
+            4, 5, 7, 8 -> {
+                binding.btnLayout.nextButton.isEnabled = questionData.selectedRating != null
+                binding.btnLayout.nextButton.isClickable = questionData.selectedRating != null
             }
         }
 

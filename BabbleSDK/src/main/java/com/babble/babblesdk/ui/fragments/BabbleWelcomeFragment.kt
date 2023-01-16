@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.babble.babblesdk.databinding.FragmentBabbleWelcomeBinding
-import com.babble.babblesdk.model.getQuestionModel.QuestionResponse
+import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.utils.BabbleConstants
 
-const val QUESTION_DATA = "data"
 
 internal class BabbleWelcomeFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleWelcomeBinding
@@ -21,11 +21,11 @@ internal class BabbleWelcomeFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val questionText=questionData.document?.fields?.questionText?.stringValue?:""
-        val questionDesc=questionData.document?.fields?.questionDesc?.stringValue?:""
-        val buttonText=questionData.document?.fields?.ctaText?.stringValue?:""
+        val questionText=questionData.questionText?:""
+        val questionDesc=questionData.questionDesc?:""
+        val buttonText=questionData.ctaText?:""
         binding.btnLayout.nextButton.setOnClickListener {
-            surveyActivity!!.addUserResponse(questionData.document?.fields)
+            surveyActivity!!.addUserResponse(questionData)
         }
         binding.surveyTitle.text= questionText
         binding.surveySubTitle.text= questionDesc
@@ -39,10 +39,10 @@ internal class BabbleWelcomeFragment : BaseFragment() {
     }
     companion object {
         @JvmStatic
-        fun newInstance(param1: QuestionResponse) =
+        fun newInstance(param1: Questions) =
             BabbleWelcomeFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(QUESTION_DATA, param1)
+                    putSerializable(BabbleConstants.questionData, param1)
                 }
             }
     }

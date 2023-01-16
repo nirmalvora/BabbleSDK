@@ -6,24 +6,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import com.babble.babblesdk.databinding.FragmentBabbleQueTextBinding
-import com.babble.babblesdk.model.getQuestionModel.Fields
-import com.babble.babblesdk.model.getQuestionModel.QuestionResponse
+import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.utils.BabbleConstants
 
 internal class BabbleQueTextFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleQueTextBinding
-    private var fields: Fields? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentBabbleQueTextBinding.inflate(inflater, container, false)
-        fields = questionData.document?.fields
-        val questionText = fields?.questionText?.stringValue ?: ""
-        val questionDesc = fields?.questionDesc?.stringValue ?: ""
-        val buttonText = fields?.ctaText?.stringValue ?: ""
+
+        val questionText = questionData.questionText ?: ""
+        val questionDesc = questionData.questionDesc ?: ""
+        val buttonText = questionData.ctaText ?: ""
         binding.btnLayout.nextButton.setOnClickListener {
-            questionData.document?.fields?.answersText = binding.childUserInput.text.toString()
-            surveyActivity!!.addUserResponse(questionData.document?.fields)
+            questionData.answerText = binding.childUserInput.text.toString()
+            surveyActivity!!.addUserResponse(questionData)
         }
         binding.surveyTitle.text = questionText
         binding.surveySubTitle.text = questionDesc
@@ -51,10 +50,10 @@ internal class BabbleQueTextFragment : BaseFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: QuestionResponse) =
+        fun newInstance(param1: Questions) =
             BabbleQueTextFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(QUESTION_DATA, param1)
+                    putSerializable(BabbleConstants.questionData, param1)
                 }
             }
     }

@@ -11,4 +11,8 @@ internal object BabbleSdkHelper {
     fun notInitialized() {
         Log.e(TAG, "Babble sdk not Initialized")
     }
+
+    fun surveyNotFoundForTrigger() {
+        Log.e(TAG, "Survey not found for specified trigger")
+    }
 }

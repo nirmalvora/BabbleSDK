@@ -13,8 +13,8 @@ import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
 import com.babble.babblesdk.databinding.ActivitySurveyBinding
 import com.babble.babblesdk.model.AddResponseRequest
-import com.babble.babblesdk.model.getQuestionModel.Fields
-import com.babble.babblesdk.model.getQuestionModel.QuestionResponse
+import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.model.getSurveyResponse.SurveyResponse
 import com.babble.babblesdk.repository.ApiClient
 import com.babble.babblesdk.repository.BabbleApiInterface
 import com.babble.babblesdk.ui.fragments.BabbleQueFragment
@@ -30,10 +30,10 @@ import java.util.*
 
 
 class SurveyActivity : AppCompatActivity() {
-    private var surveyList: List<QuestionResponse>? = null
+    private var surveyData: SurveyResponse? = null
     private lateinit var binding: ActivitySurveyBinding
     private var questionId: Int = 0
-    private var questionList: List<QuestionResponse>? = null
+    private var questionList: List<Questions>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -47,15 +47,9 @@ class SurveyActivity : AppCompatActivity() {
     private fun setUpData() {
 
         val surveyDetail = intent.getStringExtra(BabbleConstants.surveyDetail)
-        surveyList = Gson().fromJson(surveyDetail, Array<QuestionResponse>::class.java).asList()
-        questionList = surveyList?.filter {
-            it.surveyId == null && it.surveyInstanceId == null
-        }?.sortedBy {
-            it.document?.fields?.sequenceNo?.integerValue?.let { it1 ->
-                Integer.parseInt(
-                    it1
-                )
-            }
+        surveyData = Gson().fromJson(surveyDetail, SurveyResponse::class.java)
+        questionList = surveyData?.questions?.sortedBy {
+            it.sequenceNo
         }
         binding.pageProgressBar.max = (questionList?.size ?: 0) * 100
         setUpUI()
@@ -83,7 +77,6 @@ class SurveyActivity : AppCompatActivity() {
 
     private var frag: Fragment? = null
     private fun loadFragments() {
-        //if (screen != null) {
         frag = getFragment()
         if (frag != null) {
             setProgressAnimate()
@@ -93,8 +86,6 @@ class SurveyActivity : AppCompatActivity() {
             } else {
                 ft.replace(R.id.fragment_view, frag!!).commit()
             }
-        } else {
-            //Helper.makeText(getApplicationContext(), "frag null", 1);
         }
     }
 
@@ -120,15 +111,15 @@ class SurveyActivity : AppCompatActivity() {
     private fun getFragment(): Fragment? {
         var frag: Fragment? = null
         try {
-            frag = when (questionList!![questionId].document?.fields?.questionTypeId?.integerValue
+            frag = when (questionList!![questionId].questionTypeId
                 ?: "9") {
-                "6", "9" -> {
+                6, 9 -> {
                     BabbleWelcomeFragment.newInstance(questionList!![questionId])
                 }
-                "1", "2", "4", "5", "7", "8" -> {
+                1, 2, 4, 5, 7, 8 -> {
                     BabbleQueFragment.newInstance(questionList!![questionId])
                 }
-                "3" -> {
+                3 -> {
                     BabbleQueTextFragment.newInstance(questionList!![questionId])
                 }
                 else -> {
@@ -141,47 +132,35 @@ class SurveyActivity : AppCompatActivity() {
         return frag
     }
 
-    fun addUserResponse(surveyResponse: Fields?) {
+    fun addUserResponse(surveyResponse: Questions?) {
         if ((questionList?.size ?: 0) - 1 > questionId) {
             questionId++
             setUpUI()
         }
         var responseAnswer = ""
-        when (surveyResponse?.questionTypeId?.integerValue ?: "9") {
-            "1", "2" -> {
-                responseAnswer = surveyResponse?.answers?.arrayValue?.values?.filter {
-                    it.selected
-                }?.joinToString { it -> "${it.stringValue}" }.toString()
+        when (surveyResponse?.questionTypeId ?: 9) {
+            1, 2 -> {
+                responseAnswer = surveyResponse?.selectedOptions?.joinToString { it -> it }.toString()
             }
-            "3" -> {
-                responseAnswer = surveyResponse?.answersText ?: ""
+            3 -> {
+                responseAnswer = surveyResponse?.answerText ?: ""
             }
-            "4", "5", "7", "8" -> {
+            4, 5, 7, 8 -> {
                 responseAnswer = (surveyResponse?.selectedRating ?: 0).toString()
             }
         }
-        val surveyIdData: QuestionResponse? = surveyList?.find { it.surveyId != null }
-        val surveyId: String? = if (surveyIdData != null) {
-            surveyIdData.surveyId
-        } else {
-            surveyList?.first()?.surveyId ?: ""
-        }
-        val surveyInstanceIdData: QuestionResponse? =
-            surveyList?.find { it.surveyInstanceId != null }
-        val surveyInstanceId: String? = if (surveyInstanceIdData != null) {
-            surveyInstanceIdData.surveyInstanceId
-        } else {
-            surveyList?.first()?.surveyInstanceId ?: ""
-        }
+
+        val surveyId = surveyResponse?.surveyId
+        val surveyInstanceId = surveyResponse?.surveyId
         val date: String = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).format(
             Date()
         )
         val requestData = AddResponseRequest(
             surveyId = surveyId,
-            questionTypeId = surveyResponse?.questionTypeId?.integerValue ?: "9",
-            sequenceNo = surveyResponse?.sequenceNo?.integerValue ?: "0",
+            questionTypeId = (surveyResponse?.questionTypeId ?: 9).toString(),
+            sequenceNo = (surveyResponse?.sequenceNo ?:0).toString(),
             surveyInstanceId = surveyInstanceId,
-            questionText = surveyResponse?.questionText?.stringValue ?: "",
+            questionText = surveyResponse?.questionText ?: "",
             responseCreatedAt = date,
             responseUpdatedAt = date,
             shouldMarkComplete = false,

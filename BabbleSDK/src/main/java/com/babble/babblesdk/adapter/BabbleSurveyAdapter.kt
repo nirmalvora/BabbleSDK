@@ -13,17 +13,17 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.babble.babblesdk.R
 import com.babble.babblesdk.customWidgets.BabbleDynamicSquare
-import com.babble.babblesdk.model.getQuestionModel.Fields
+import com.babble.babblesdk.model.getQuestionModel.Questions
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
 
 internal class BabbleSurveyAdapter(mContext: Context,
-                          surveyFields: Fields,babbleClickHandler: BabbleGenericClickHandler): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                          surveyFields: Questions,babbleClickHandler: BabbleGenericClickHandler): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val mContext: Context
     private val mInflater: LayoutInflater
     private var babbleClickHandler: BabbleGenericClickHandler
     private var listSize = 0
     private var viewType = -1
-    private var surveyFields: Fields? = null
+    private var surveyFields: Questions? = null
 
     private val emojis = arrayOf(
         R.string.smileyHtml1,
@@ -95,11 +95,11 @@ internal class BabbleSurveyAdapter(mContext: Context,
         when (viewType) {
             0 -> {
                val mcqHolder:MCQRadioViewHolder=holder as MCQRadioViewHolder
-                mcqHolder.title.text= this.surveyFields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
+                mcqHolder.title.text= this.surveyFields?.answers?.get(position)?:""
                 (mcqHolder.title.parent as RelativeLayout).background= ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
                 val gd =
                     (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
-                if (this.surveyFields?.answers?.arrayValue?.values?.get(position)?.selected == true) {
+                if (this.surveyFields?.selectedOptions?.contains(surveyFields?.answers?.get(position) ?: "") == true) {
                     gd.setColor(ContextCompat.getColor(mContext,R.color.colorPrimaryDark))
                     mcqHolder.title.setTextColor(
                         ContextCompat.getColor(mContext,R.color.white)
@@ -178,24 +178,24 @@ internal class BabbleSurveyAdapter(mContext: Context,
         this.mContext = mContext
         this.babbleClickHandler = babbleClickHandler
         this.surveyFields = surveyFields
-        when (this.surveyFields?.questionTypeId?.integerValue?:"9") {
-            "1","2" -> {
+        when (this.surveyFields?.questionTypeId?:9) {
+            1,2 -> {
                 viewType = 0
-                listSize = this.surveyFields?.answers?.arrayValue?.values?.size ?: 0
+                listSize = this.surveyFields?.answers?.size ?: 0
             }
-            "4" -> {
+            4 -> {
                 viewType = 1
                 listSize = 10
             }
-            "5" -> {
+            5 -> {
                 viewType = 1
                 listSize = 5
             }
-            "7" -> {
+            7 -> {
                 viewType = 2
                 listSize = 5
             }
-            "8" -> {
+            8 -> {
                 viewType = 3
                 listSize = 5
             }
@@ -206,7 +206,7 @@ internal class BabbleSurveyAdapter(mContext: Context,
         }
     }
 
-    fun notifyMyList(surveyInputs: Fields) {
+    fun notifyMyList(surveyInputs: Questions) {
         this.surveyFields = null
         this.surveyFields = surveyInputs
         notifyDataSetChanged()

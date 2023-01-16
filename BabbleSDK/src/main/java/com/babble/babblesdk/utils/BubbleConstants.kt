@@ -1,5 +1,6 @@
 package com.babble.babblesdk.utils
 
 internal object BabbleConstants {
-    var surveyDetail = "surveyDetail"
+    const val surveyDetail = "surveyDetail"
+    const val questionData = "questionData"
 }
