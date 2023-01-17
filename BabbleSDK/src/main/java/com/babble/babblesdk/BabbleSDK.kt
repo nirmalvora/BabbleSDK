@@ -22,10 +22,10 @@ class BabbleSDK(activity: AppCompatActivity) {
             }
         }
 
-        fun triggerSurvey(trigger: String) {
+        fun triggerSurvey(trigger: String,customerId: String?=null,params: Any?=null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.trigger(trigger)
+                    ?.trigger(trigger=trigger,customerId=customerId, params=params)
             } else {
                 BabbleSdkHelper.notInitialized()
             }

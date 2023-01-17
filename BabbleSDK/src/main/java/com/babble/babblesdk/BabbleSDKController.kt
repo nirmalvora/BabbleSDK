@@ -2,7 +2,6 @@ package com.babble.babblesdk
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import com.babble.babblesdk.model.getQuestionModel.Questions
 import com.babble.babblesdk.model.getSurveyResponse.SurveyResponse
 import com.babble.babblesdk.model.triggerModel.TriggerModel
 import com.babble.babblesdk.repository.ApiClient
@@ -14,8 +13,6 @@ import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 internal class BabbleSDKController(context: AppCompatActivity) {
@@ -33,22 +30,19 @@ internal class BabbleSDKController(context: AppCompatActivity) {
             }
             return sc
         }
-
     }
 
-    fun trigger(trigger: String) {
+    fun trigger(trigger: String, customerId: String? = null, params: Any? = null) {
         if (isInitialize) {
-          val surveyData =  surveyList?.find { it.triggerId==trigger }
-            if(surveyData!=null) {
-                val surveyIntent =
-                    Intent(mContext!!.applicationContext, SurveyActivity::class.java)
+            val surveyData = surveyList?.find { it.triggerId == trigger }
+            if (surveyData != null) {
+                val surveyIntent = Intent(mContext!!.applicationContext, SurveyActivity::class.java)
                 surveyIntent.putExtra(
-                    BabbleConstants.surveyDetail,
-                    Gson().toJson(surveyData)
+                    BabbleConstants.surveyDetail, Gson().toJson(surveyData)
                 )
                 surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 mContext?.startActivity(surveyIntent)
-            }else{
+            } else {
                 BabbleSdkHelper.surveyNotFoundForTrigger()
             }
 
@@ -58,19 +52,18 @@ internal class BabbleSDKController(context: AppCompatActivity) {
     }
 
     fun init(apiKey: String) {
-        this.apiKey=apiKey
+        this.apiKey = apiKey
         val connectAPI: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
-        connectAPI.getAllTrigger(apiKey).enqueue(object :Callback<List<TriggerModel>>{
+        connectAPI.getAllTrigger(apiKey).enqueue(object : Callback<List<TriggerModel>> {
             override fun onResponse(
-                call: Call<List<TriggerModel>>,
-                response: Response<List<TriggerModel>>
+                call: Call<List<TriggerModel>>, response: Response<List<TriggerModel>>
             ) {
 
                 if (response.isSuccessful) {
                     triggerData = response.body()
-                    connectAPI.getSurvey(apiKey).enqueue(object :Callback<List<SurveyResponse>>{
+                    connectAPI.getSurvey(apiKey).enqueue(object : Callback<List<SurveyResponse>> {
                         override fun onResponse(
                             call: Call<List<SurveyResponse>>,
                             response: Response<List<SurveyResponse>>

@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import com.babble.babblesdk.databinding.FragmentBabbleWelcomeBinding
 import com.babble.babblesdk.model.getQuestionModel.Questions
 import com.babble.babblesdk.utils.BabbleConstants
+import java.util.*
+import kotlin.concurrent.timerTask
 
 
 internal class BabbleWelcomeFragment : BaseFragment() {
@@ -33,6 +36,19 @@ internal class BabbleWelcomeFragment : BaseFragment() {
         binding.surveyTitle.visibility=getVisibility(questionText)
         binding.surveySubTitle.visibility=getVisibility(questionDesc)
         binding.btnLayout.nextButton.visibility=getVisibility(buttonText)
+        if(questionData.questionTypeId==9){
+            val subTitleLayoutParams = binding.surveySubTitle.layoutParams as RelativeLayout.LayoutParams
+            subTitleLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
+            binding.surveySubTitle.layoutParams = subTitleLayoutParams
+            val titleLayoutParams = binding.surveyTitle.layoutParams as RelativeLayout.LayoutParams
+            titleLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
+            binding.surveyTitle.layoutParams = titleLayoutParams
+
+            val timer = Timer()
+            timer.schedule(timerTask {
+                requireActivity().finish()
+                                     }, 1000)
+        }
     }
     private fun getVisibility(text:String): Int {
         return if(text.isEmpty()) View.GONE else View.VISIBLE

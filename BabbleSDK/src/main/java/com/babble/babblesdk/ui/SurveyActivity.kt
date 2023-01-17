@@ -1,6 +1,8 @@
 package com.babble.babblesdk.ui
 
 import android.animation.ObjectAnimator
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -182,5 +184,13 @@ class SurveyActivity : AppCompatActivity() {
                 Log.e(TAG, "onFailure: $t")
             }
         })
+    }
+    override fun attachBaseContext(newBase: Context?) {
+
+        val newOverride = Configuration(newBase?.resources?.configuration)
+        newOverride.fontScale = 1.0f
+        applyOverrideConfiguration(newOverride)
+
+        super.attachBaseContext(newBase)
     }
 }
