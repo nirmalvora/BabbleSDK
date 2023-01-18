@@ -1,7 +1,8 @@
 package com.babble.babblesdk
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import com.babble.babblesdk.model.getSurveyResponse.SurveyResponse
 import com.babble.babblesdk.model.triggerModel.TriggerModel
 import com.babble.babblesdk.repository.ApiClient
@@ -15,16 +16,17 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-internal class BabbleSDKController(context: AppCompatActivity) {
-    var mContext: AppCompatActivity? = context
+internal class BabbleSDKController(context: Activity) {
+    var mContext: Activity? = context
     var triggerData: List<TriggerModel>? = null
     var surveyList: List<SurveyResponse>? = null
     private var apiKey: String? = null
     var isInitialize: Boolean = false
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         private var sc: BabbleSDKController? = null
-        fun getInstance(context: AppCompatActivity): BabbleSDKController? {
+        fun getInstance(context: Activity): BabbleSDKController? {
             if (sc == null) {
                 sc = BabbleSDKController(context)
             }

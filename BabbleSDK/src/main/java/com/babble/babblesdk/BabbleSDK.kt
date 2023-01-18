@@ -1,18 +1,20 @@
 package com.babble.babblesdk
 
-import androidx.appcompat.app.AppCompatActivity
+import android.annotation.SuppressLint
+import android.app.Activity
 import com.babble.babblesdk.utils.BabbleSdkHelper
 
 
 var TAG = "BabbleSDK"
 
-class BabbleSDK(activity: AppCompatActivity) {
-    private var activity: AppCompatActivity? = activity
+class BabbleSDK(activity: Activity) {
+    private var activity: Activity? = activity
 
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         private lateinit var instance: BabbleSDK
-        fun init(activity: AppCompatActivity, apiKey: String) {
+        fun init(activity: Activity, apiKey: String) {
             instance = BabbleSDK(activity)
             if (apiKey.isNotEmpty()) {
                 BabbleSDKController.getInstance(instance.activity!!)
