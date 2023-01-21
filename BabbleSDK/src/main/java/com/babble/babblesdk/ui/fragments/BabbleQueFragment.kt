@@ -1,7 +1,6 @@
 package com.babble.babblesdk.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.babble.babblesdk.adapter.BabbleSurveyAdapter
 import com.babble.babblesdk.databinding.FragmentBabbleQueBinding
-import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
 
@@ -23,11 +22,12 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentBabbleQueBinding.inflate(inflater, container, false)
-        val questionText = questionData.questionText ?: ""
-        val ratingsFullLike = questionData.maxValDescription ?: ""
-        val ratingsNotLike = questionData.minValDescription ?: ""
-        val questionDesc = questionData.questionDesc ?: ""
-        val buttonText = questionData.ctaText ?: ""
+        val field = questionData.document?.fields
+        val questionText = field?.questionText?.stringValue ?: ""
+        val ratingsFullLike = field?.maxValDescription?.stringValue ?: ""
+        val ratingsNotLike = field?.minValDescription?.stringValue ?: ""
+        val questionDesc = field?.questionDesc?.stringValue ?: ""
+        val buttonText = field?.ctaText?.stringValue ?: ""
         binding.btnLayout.nextButton.setOnClickListener {
             surveyActivity!!.addUserResponse(questionData)
         }
@@ -44,14 +44,14 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.ratingsNotLike.visibility = getVisibility(ratingsNotLike)
 
         val mLayoutManager: RecyclerView.LayoutManager =
-            when (questionData.questionTypeId ?: 9) {
-                1, 2 -> {
+            when (questionData.document?.fields?.questionTypeId?.integerValue ?: "9") {
+                "1", "2" -> {
                     LinearLayoutManager(activity)
                 }
-                4 -> {
+                "4" -> {
                     GridLayoutManager(activity, 10)
                 }
-                5, 7, 8 -> {
+                "5", "7", "8" -> {
                     GridLayoutManager(activity, 5)
                 }
                 else -> {
@@ -76,7 +76,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: Questions) =
+        fun newInstance(param1: UserQuestionResponse) =
             BabbleQueFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable(BabbleConstants.questionData, param1)
@@ -85,20 +85,33 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
     }
 
     override fun itemClicked(position: Int) {
-        when (questionData.questionTypeId ?: 9) {
-            1 -> {
-                if(questionData.selectedOptions.contains(questionData.answers[position])){
-                    questionData.selectedOptions.remove(questionData.answers[position])
-                }else{
-                    questionData.selectedOptions.add(questionData.answers[position])
+        when (questionData.document?.fields?.questionTypeId?.integerValue ?: "9") {
+            "1" -> {
+                if (questionData.selectedOptions.contains(
+                        questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
+                            ?: ""
+                    )
+                ) {
+                    questionData.selectedOptions.remove(
+                        questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
+                            ?: ""
+                    )
+                } else {
+                    questionData.selectedOptions.add(
+                        questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
+                            ?: ""
+                    )
 
                 }
             }
-            2 -> {
-                questionData.selectedOptions= arrayListOf()
-                questionData.selectedOptions.add(questionData.answers[position])
+            "2" -> {
+                questionData.selectedOptions = arrayListOf()
+                questionData.selectedOptions.add(
+                    questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
+                        ?: ""
+                )
             }
-            4, 5, 7, 8 -> {
+            "4", "5", "7", "8" -> {
                 if (questionData.selectedRating == (position + 1)) {
                     questionData.selectedRating = null
                 } else {
@@ -111,13 +124,13 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
     }
 
     private fun checkIfNextButtonEnabled() {
-        when (questionData.questionTypeId ?: 9) {
-            1, 2 -> {
-                val isEnabled = questionData.selectedOptions.size!=0
+        when (questionData.document?.fields?.questionTypeId?.integerValue ?: "9") {
+            "1", "2" -> {
+                val isEnabled = questionData.selectedOptions.size != 0
                 binding.btnLayout.nextButton.isEnabled = isEnabled
                 binding.btnLayout.nextButton.isClickable = isEnabled
             }
-            4, 5, 7, 8 -> {
+            "4", "5", "7", "8" -> {
                 binding.btnLayout.nextButton.isEnabled = questionData.selectedRating != null
                 binding.btnLayout.nextButton.isClickable = questionData.selectedRating != null
             }

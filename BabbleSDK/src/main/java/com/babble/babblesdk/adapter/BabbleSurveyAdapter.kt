@@ -13,17 +13,19 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.babble.babblesdk.R
 import com.babble.babblesdk.customWidgets.BabbleDynamicSquare
-import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
 
-internal class BabbleSurveyAdapter(mContext: Context,
-                          surveyFields: Questions,babbleClickHandler: BabbleGenericClickHandler): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class BabbleSurveyAdapter(
+    mContext: Context,
+    surveyFields: UserQuestionResponse, babbleClickHandler: BabbleGenericClickHandler
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val mContext: Context
     private val mInflater: LayoutInflater
     private var babbleClickHandler: BabbleGenericClickHandler
     private var listSize = 0
     private var viewType = -1
-    private var surveyFields: Questions? = null
+    private var surveyFields: UserQuestionResponse? = null
 
     private val emojis = arrayOf(
         R.string.smileyHtml1,
@@ -35,6 +37,7 @@ internal class BabbleSurveyAdapter(mContext: Context,
 
     class MCQRadioViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var title: RadioButton
+
         init {
             title = view.findViewById<View>(R.id.child_title) as RadioButton
         }
@@ -83,7 +86,7 @@ internal class BabbleSurveyAdapter(mContext: Context,
                 view = mInflater.inflate(R.layout.ratings_emoji_child, parent, false)
                 RatingsEmojiViewHolder(view)
             }
-            else->{
+            else -> {
                 view = mInflater.inflate(R.layout.mcq_radio_list_child, parent, false)
                 MCQRadioViewHolder(view)
             }
@@ -94,20 +97,29 @@ internal class BabbleSurveyAdapter(mContext: Context,
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (viewType) {
             0 -> {
-               val mcqHolder:MCQRadioViewHolder=holder as MCQRadioViewHolder
-                mcqHolder.title.text= this.surveyFields?.answers?.get(position)?:""
-                (mcqHolder.title.parent as RelativeLayout).background= ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
+                val mcqHolder: MCQRadioViewHolder = holder as MCQRadioViewHolder
+                mcqHolder.title.text =
+                    this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
+                (mcqHolder.title.parent as RelativeLayout).background =
+                    ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
                 val gd =
                     (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
-                if (this.surveyFields?.selectedOptions?.contains(surveyFields?.answers?.get(position) ?: "") == true) {
-                    gd.setColor(ContextCompat.getColor(mContext,R.color.colorPrimaryDark))
+                if (this.surveyFields?.selectedOptions?.contains(this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
+                    ) == true
+                ) {
+                    gd.setColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
                     mcqHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext,R.color.white)
+                        ContextCompat.getColor(mContext, R.color.white)
                     )
                 } else {
-                    gd.setColor(ContextCompat.getColor(mContext,R.color.new_theme_gray)) //R.color.new_theme_gray));
+                    gd.setColor(
+                        ContextCompat.getColor(
+                            mContext,
+                            R.color.new_theme_gray
+                        )
+                    ) //R.color.new_theme_gray));
                     mcqHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext,R.color.txtblack)
+                        ContextCompat.getColor(mContext, R.color.txtblack)
                     )
                 }
                 (mcqHolder.title.parent as RelativeLayout).setOnClickListener {
@@ -115,20 +127,26 @@ internal class BabbleSurveyAdapter(mContext: Context,
                 }
             }
             1 -> {
-                val ratingHolder:RatingsViewHolder=holder as RatingsViewHolder
-                ratingHolder.title.text="${position+1}"
-                (ratingHolder.title.parent as RelativeLayout).background= ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
+                val ratingHolder: RatingsViewHolder = holder as RatingsViewHolder
+                ratingHolder.title.text = "${position + 1}"
+                (ratingHolder.title.parent as RelativeLayout).background =
+                    ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
                 val gd =
                     (ratingHolder.title.parent as RelativeLayout).background as GradientDrawable
-                if (this.surveyFields?.selectedRating == (position+1)) {
-                    gd.setColor(ContextCompat.getColor(mContext,R.color.colorPrimaryDark))
+                if (this.surveyFields?.selectedRating == (position + 1)) {
+                    gd.setColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
                     ratingHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext,R.color.white)
+                        ContextCompat.getColor(mContext, R.color.white)
                     )
-                }else{
-                    gd.setColor(ContextCompat.getColor(mContext,R.color.new_theme_gray)) //R.color.new_theme_gray));
+                } else {
+                    gd.setColor(
+                        ContextCompat.getColor(
+                            mContext,
+                            R.color.new_theme_gray
+                        )
+                    ) //R.color.new_theme_gray));
                     ratingHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext,R.color.txtblack)
+                        ContextCompat.getColor(mContext, R.color.txtblack)
                     )
                 }
                 (ratingHolder.title.parent as RelativeLayout).setOnClickListener {
@@ -136,14 +154,14 @@ internal class BabbleSurveyAdapter(mContext: Context,
                 }
             }
             2 -> {
-                val ratingStarViewHolder:RatingsStarViewHolder=holder as RatingsStarViewHolder
-                if((position+1)<=(this.surveyFields?.selectedRating?:-1)){
+                val ratingStarViewHolder: RatingsStarViewHolder = holder as RatingsStarViewHolder
+                if ((position + 1) <= (this.surveyFields?.selectedRating ?: -1)) {
                     ratingStarViewHolder.stars.setImageDrawable(
-                        ContextCompat.getDrawable(mContext,R.drawable.selected_star)
+                        ContextCompat.getDrawable(mContext, R.drawable.selected_star)
                     )
-                }else{
+                } else {
                     ratingStarViewHolder.stars.setImageDrawable(
-                        ContextCompat.getDrawable(mContext,R.drawable.unselected_star)
+                        ContextCompat.getDrawable(mContext, R.drawable.unselected_star)
                     )
                 }
                 (ratingStarViewHolder.stars.parent as RelativeLayout).setOnClickListener {
@@ -151,11 +169,12 @@ internal class BabbleSurveyAdapter(mContext: Context,
                 }
             }
             3 -> {
-                val ratingsEmojiViewHolder:RatingsEmojiViewHolder=holder as RatingsEmojiViewHolder
+                val ratingsEmojiViewHolder: RatingsEmojiViewHolder =
+                    holder as RatingsEmojiViewHolder
                 ratingsEmojiViewHolder.emoji.text = mContext.resources.getString(
                     emojis[position]
                 )
-                if (this.surveyFields?.selectedRating == (position+1)) {
+                if (this.surveyFields?.selectedRating == (position + 1)) {
                     (ratingsEmojiViewHolder.emoji.parent
                         .parent as BabbleDynamicSquare).setBackgroundResource(R.drawable.rounded_rectangle_selected)
                 } else {
@@ -178,24 +197,24 @@ internal class BabbleSurveyAdapter(mContext: Context,
         this.mContext = mContext
         this.babbleClickHandler = babbleClickHandler
         this.surveyFields = surveyFields
-        when (this.surveyFields?.questionTypeId?:9) {
-            1,2 -> {
+        when (this.surveyFields?.document?.fields?.questionTypeId?.integerValue ?: "9") {
+            "1", "2" -> {
                 viewType = 0
-                listSize = this.surveyFields?.answers?.size ?: 0
+                listSize = this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.size?:0
             }
-            4 -> {
+            "4" -> {
                 viewType = 1
                 listSize = 10
             }
-            5 -> {
+            "5" -> {
                 viewType = 1
                 listSize = 5
             }
-            7 -> {
+            "7" -> {
                 viewType = 2
                 listSize = 5
             }
-            8 -> {
+            "8" -> {
                 viewType = 3
                 listSize = 5
             }
@@ -206,7 +225,7 @@ internal class BabbleSurveyAdapter(mContext: Context,
         }
     }
 
-    fun notifyMyList(surveyInputs: Questions) {
+    fun notifyMyList(surveyInputs: UserQuestionResponse) {
         this.surveyFields = null
         this.surveyFields = surveyInputs
         notifyDataSetChanged()

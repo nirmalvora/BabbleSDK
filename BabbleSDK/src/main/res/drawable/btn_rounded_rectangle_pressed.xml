@@ -19,7 +19,7 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="@color/btn_pressed"></solid>
+    <solid android:color="@color/btn_pressed" />
     <padding
         android:bottom="0dip"
         android:left="0dip"

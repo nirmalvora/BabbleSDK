@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import com.babble.babblesdk.databinding.FragmentBabbleQueTextBinding
-import com.babble.babblesdk.model.getQuestionModel.Questions
+import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
 
 internal class BabbleQueTextFragment : BaseFragment() {
@@ -16,10 +16,10 @@ internal class BabbleQueTextFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentBabbleQueTextBinding.inflate(inflater, container, false)
-
-        val questionText = questionData.questionText ?: ""
-        val questionDesc = questionData.questionDesc ?: ""
-        val buttonText = questionData.ctaText ?: ""
+        val field = questionData.document?.fields
+        val questionText = field?.questionText?.stringValue ?: ""
+        val questionDesc = field?.questionDesc?.stringValue ?: ""
+        val buttonText = field?.ctaText?.stringValue ?: ""
         binding.btnLayout.nextButton.setOnClickListener {
             questionData.answerText = binding.childUserInput.text.toString()
             surveyActivity!!.addUserResponse(questionData)
@@ -50,7 +50,7 @@ internal class BabbleQueTextFragment : BaseFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: Questions) =
+        fun newInstance(param1: UserQuestionResponse) =
             BabbleQueTextFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable(BabbleConstants.questionData, param1)

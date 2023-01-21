@@ -19,7 +19,7 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="@color/ratings_focused"></solid>
+    <solid android:color="@color/ratings_focused" />
 
 
     <corners

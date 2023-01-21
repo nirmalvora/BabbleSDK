@@ -1,32 +1,39 @@
 package com.babble.babblesdk
 
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import com.babble.babblesdk.model.getSurveyResponse.SurveyResponse
-import com.babble.babblesdk.model.triggerModel.TriggerModel
+import android.util.Log
+import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
+import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
+import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
 import com.babble.babblesdk.repository.ApiClient
 import com.babble.babblesdk.repository.BabbleApiInterface
 import com.babble.babblesdk.ui.SurveyActivity
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleSdkHelper
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import java.util.*
 
 
-internal class BabbleSDKController(context: Activity) {
-    var mContext: Activity? = context
-    var triggerData: List<TriggerModel>? = null
-    var surveyList: List<SurveyResponse>? = null
-    private var apiKey: String? = null
-    var isInitialize: Boolean = false
+internal class BabbleSDKController(context: Context) {
+    private var mContext: Context? = context
+
+    private var userId: String? = null
+    private var babbleCustomerId: String? = null
+    private var isInitialize: Boolean = false
+
+    var userSurveyResponse: List<UserSurveyResponse>? = null
+    var userTriggerResponse: List<UserTriggerResponse>? = null
+    var userQuestionResponse: List<UserQuestionResponse>? = null
 
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var sc: BabbleSDKController? = null
-        fun getInstance(context: Activity): BabbleSDKController? {
+        fun getInstance(context: Context): BabbleSDKController? {
             if (sc == null) {
                 sc = BabbleSDKController(context)
             }
@@ -34,16 +41,33 @@ internal class BabbleSDKController(context: Activity) {
         }
     }
 
-    fun trigger(trigger: String, customerId: String? = null, params: Any? = null) {
+    fun trigger(trigger: String) {
         if (isInitialize) {
-            val surveyData = surveyList?.find { it.triggerId == trigger }
-            if (surveyData != null) {
+            val triggerData = userTriggerResponse?.find {
+                (it.document?.fields?.name?.stringValue ?: "") == trigger
+            }
+            val triggerId = triggerData?.document?.name?.substring(
+                triggerData.document?.name?.lastIndexOf('/')
+                    ?.plus(1) ?: 0
+            )
+            val survey = userSurveyResponse?.find {
+                (it.document?.fields?.triggerId?.stringValue ?: "") == triggerId
+            }
+            val surveyId = survey?.document?.name?.substring(
+                survey.document?.name?.lastIndexOf('/')
+                    ?.plus(1) ?: 0
+            )
+
+            val questionList = userQuestionResponse?.filter {
+                (it.document?.fields?.surveyId?.stringValue ?: "") == surveyId
+            }
+            if (questionList != null && questionList.isNotEmpty()) {
                 val surveyIntent = Intent(mContext!!.applicationContext, SurveyActivity::class.java)
                 surveyIntent.putExtra(
-                    BabbleConstants.surveyDetail, Gson().toJson(surveyData)
+                    BabbleConstants.surveyDetail, Gson().toJson(questionList)
                 )
                 surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                mContext?.startActivity(surveyIntent)
+                mContext?.applicationContext?.startActivity(surveyIntent)
             } else {
                 BabbleSdkHelper.surveyNotFoundForTrigger()
             }
@@ -53,44 +77,45 @@ internal class BabbleSDKController(context: Activity) {
         }
     }
 
-    fun init(apiKey: String) {
-        this.apiKey = apiKey
-        val connectAPI: BabbleApiInterface = ApiClient.getInstance().create(
+    fun setCustomerId(customerId: String) {
+        this.babbleCustomerId = customerId
+        Log.e(TAG, "setCustomerId:${customerId} ")
+    }
+
+    private var disposable: Disposable? = null
+    fun init(userId: String) {
+        this.userId = userId
+        val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
-        connectAPI.getAllTrigger(apiKey).enqueue(object : Callback<List<TriggerModel>> {
-            override fun onResponse(
-                call: Call<List<TriggerModel>>, response: Response<List<TriggerModel>>
-            ) {
 
-                if (response.isSuccessful) {
-                    triggerData = response.body()
-                    connectAPI.getSurvey(apiKey).enqueue(object : Callback<List<SurveyResponse>> {
-                        override fun onResponse(
-                            call: Call<List<SurveyResponse>>,
-                            response: Response<List<SurveyResponse>>
-                        ) {
-
-                            if (response.isSuccessful) {
-                                isInitialize = true
-                                surveyList = response.body()
-                            }
-                        }
-
-                        override fun onFailure(call: Call<List<SurveyResponse>>, t: Throwable) {
-                            BabbleSdkHelper.initializationFailed()
-                        }
-                    })
-
-
-                } else {
+        disposable = Observable.zip(
+            babbleApi.getSurveyForUserId(this.userId),
+            babbleApi.getTriggerForUserId(this.userId),
+            babbleApi.getQuestionForUserId(this.userId),
+            object :
+                Function3<List<UserSurveyResponse>, List<UserTriggerResponse>, List<UserQuestionResponse>, Unit> {
+                override fun invoke(
+                    p1: List<UserSurveyResponse>,
+                    p2: List<UserTriggerResponse>,
+                    p3: List<UserQuestionResponse>
+                ) {
+                    userSurveyResponse = p1
+                    userTriggerResponse = p2
+                    userQuestionResponse = p3
+                }
+            })
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { }
+            .doOnTerminate { }
+            .subscribe(
+                {
+                    this.isInitialize = true
+                },
+                {
                     BabbleSdkHelper.initializationFailed()
                 }
-            }
+            )
 
-            override fun onFailure(call: Call<List<TriggerModel>>, t: Throwable) {
-                BabbleSdkHelper.initializationFailed()
-            }
-        })
     }
 }

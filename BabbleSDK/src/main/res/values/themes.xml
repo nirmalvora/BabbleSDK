@@ -16,7 +16,7 @@
   ~
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <style name="CDialogThemeBottom" parent="@style/Theme.AppCompat">
         <item name="android:windowFrame">@null</item>

@@ -1,35 +1,43 @@
 package com.babble.babblesdk
 
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Context
 import com.babble.babblesdk.utils.BabbleSdkHelper
+import java.util.*
 
 
 var TAG = "BabbleSDK"
 
-class BabbleSDK(activity: Activity) {
-    private var activity: Activity? = activity
+class BabbleSDK(activity: Context) {
+    private var activity: Context? = activity
 
 
     companion object {
         @SuppressLint("StaticFieldLeak")
         private lateinit var instance: BabbleSDK
-        fun init(activity: Activity, apiKey: String) {
+        fun init(activity: Context, userId: String) {
             instance = BabbleSDK(activity)
-            if (apiKey.isNotEmpty()) {
+            if (userId.isNotEmpty()) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.init(apiKey)
+                    ?.init(userId)
             } else {
                 BabbleSdkHelper.initializationFailed()
             }
         }
 
-        fun triggerSurvey(trigger: String,customerId: String?=null,params: Any?=null) {
+        fun triggerSurvey(trigger: String) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.trigger(trigger=trigger,customerId=customerId, params=params)
+                    ?.trigger(trigger = trigger)
             } else {
                 BabbleSdkHelper.notInitialized()
+            }
+        }
+
+        fun setCustomerId(customerId: String) {
+            if (this::instance.isInitialized) {
+                BabbleSDKController.getInstance(instance.activity!!)
+                    ?.setCustomerId(customerId = customerId)
             }
         }
     }

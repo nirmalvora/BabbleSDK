@@ -2,6 +2,8 @@ package com.babble.babblesdk.utils
 
 import android.util.Log
 import com.babble.babblesdk.TAG
+import java.text.SimpleDateFormat
+import java.util.*
 
 internal object BabbleSdkHelper {
     fun initializationFailed() {
@@ -14,5 +16,11 @@ internal object BabbleSdkHelper {
 
     fun surveyNotFoundForTrigger() {
         Log.e(TAG, "Survey not found for specified trigger")
+    }
+
+    fun getCurrentDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).format(
+            Date()
+        )
     }
 }
