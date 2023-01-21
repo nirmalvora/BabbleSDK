@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
@@ -16,6 +17,9 @@ import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
 import java.util.*
 
 
@@ -61,6 +65,31 @@ internal class BabbleSDKController(context: Context) {
             val questionList = userQuestionResponse?.filter {
                 (it.document?.fields?.surveyId?.stringValue ?: "") == surveyId
             }
+            val surveyInstanceRequest = SurveyInstanceRequest(
+                customerId = this.babbleCustomerId,
+                surveyId = surveyId,
+                timeVal = BabbleSdkHelper.getCurrentDate(),
+                userId = this.userId,
+                surveyInstanceId = BabbleSdkHelper.getRandomString(10)
+            )
+            val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
+                BabbleApiInterface::class.java
+            )
+            babbleApi.createSurveyInstance(surveyInstanceRequest)
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: retrofit2.Response<ResponseBody>
+                    ) {
+                        Log.e(TAG, "onResponse: $response")
+                        Log.e(TAG, "onResponse: ${response.body()?.string()}")
+                    }
+
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e(TAG, "onFailure: $t")
+                    }
+                })
+
             if (questionList != null && questionList.isNotEmpty()) {
                 val surveyIntent = Intent(mContext!!.applicationContext, SurveyActivity::class.java)
                 surveyIntent.putExtra(
@@ -80,6 +109,7 @@ internal class BabbleSDKController(context: Context) {
     fun setCustomerId(customerId: String) {
         this.babbleCustomerId = customerId
         Log.e(TAG, "setCustomerId:${customerId} ")
+
     }
 
     private var disposable: Disposable? = null

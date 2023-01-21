@@ -12,9 +12,9 @@ internal class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        BabbleSDK.setCustomerId("nirmalvora0910@gmail.com")
+        BabbleSDK.setCustomerId(customerId = "nirmalvora0910@gmail.com")
         binding.openSurvey.setOnClickListener {
-            BabbleSDK.triggerSurvey("test-all-questions")
+            BabbleSDK.triggerSurvey(trigger = "test-all-questions")
         }
     }
 }

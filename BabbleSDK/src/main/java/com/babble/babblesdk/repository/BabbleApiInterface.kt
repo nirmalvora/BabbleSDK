@@ -1,6 +1,7 @@
 package com.babble.babblesdk.repository
 
 import com.babble.babblesdk.model.AddResponseRequest
+import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
@@ -14,6 +15,11 @@ internal interface BabbleApiInterface {
     @POST("write_survery_question_response")
     fun addResponse(
         @Body request: AddResponseRequest
+    ): Call<ResponseBody>
+
+    @POST("create_survey_instance")
+    fun createSurveyInstance(
+        @Body request: SurveyInstanceRequest
     ): Call<ResponseBody>
 
 

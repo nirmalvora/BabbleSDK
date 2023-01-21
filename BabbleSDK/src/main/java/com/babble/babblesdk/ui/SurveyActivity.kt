@@ -152,6 +152,9 @@ class SurveyActivity : AppCompatActivity() {
         val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue
             ?: "9"
         if (questionTypeId != "6" && questionTypeId != "9") {
+            val tempQuestionList =
+                questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
+
             var responseAnswer = ""
             when (questionTypeId) {
                 "1", "2" -> {
@@ -178,8 +181,8 @@ class SurveyActivity : AppCompatActivity() {
                 questionText = surveyResponse?.document?.fields?.questionText?.stringValue ?: "",
                 responseCreatedAt = date,
                 responseUpdatedAt = date,
-                shouldMarkComplete = false,
-                shouldMarkPartial = false,
+                shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse?.document?.name,
+                shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse?.document?.name,
                 response = responseAnswer
             )
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
@@ -190,8 +193,7 @@ class SurveyActivity : AppCompatActivity() {
                     call: Call<ResponseBody>,
                     response: retrofit2.Response<ResponseBody>
                 ) {
-                    Log.e(TAG, "onResponse: $response")
-                    Log.e(TAG, "onResponse: ${response.body()?.string()}")
+                    Log.e(TAG, "Survey response saved.")
                 }
 
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
