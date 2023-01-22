@@ -7,8 +7,8 @@ import java.io.Serializable
 data class AddResponseRequest(
 
     @SerializedName("survey_id") var surveyId: String? = null,
-    @SerializedName("question_type_id") var questionTypeId: String? = null,
-    @SerializedName("sequence_no") var sequenceNo: String? = null,
+    @SerializedName("question_type_id") var questionTypeId: Int? = null,
+    @SerializedName("sequence_no") var sequenceNo: Int? = null,
     @SerializedName("survey_instance_id") var surveyInstanceId: String? = null,
     @SerializedName("question_text") var questionText: String? = null,
     @SerializedName("response_created_at") var responseCreatedAt: String? = null,

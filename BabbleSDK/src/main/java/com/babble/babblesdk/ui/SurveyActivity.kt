@@ -172,13 +172,12 @@ class SurveyActivity : AppCompatActivity() {
             }
 
             val surveyId = surveyResponse?.document?.fields?.surveyId?.stringValue
-            val surveyInstanceId = surveyResponse?.document?.fields?.surveyId?.stringValue
             val date: String = getCurrentDate()
             val requestData = AddResponseRequest(
                 surveyId = surveyId,
-                questionTypeId = questionTypeId,
-                sequenceNo = (surveyResponse?.document?.fields?.sequenceNo?.integerValue
-                    ?: "-1").toString(),
+                questionTypeId = Integer.parseInt(questionTypeId),
+                sequenceNo = Integer.parseInt((surveyResponse?.document?.fields?.sequenceNo?.integerValue
+                    ?: "-1").toString()),
                 surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
                 questionText = surveyResponse?.document?.fields?.questionText?.stringValue ?: "",
                 responseCreatedAt = date,
