@@ -26,8 +26,8 @@ import java.util.*
 internal class BabbleSDKController(context: Context) {
     private var mContext: Context? = context
 
-    private var userId: String? = null
-     var surveyInstanceId: String? = null
+    var userId: String? = null
+    var surveyInstanceId: String? = null
     private var babbleCustomerId: String? = null
     private var isInitialize: Boolean = false
 

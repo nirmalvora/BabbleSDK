@@ -191,7 +191,7 @@ class SurveyActivity : AppCompatActivity() {
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java
             )
-            babbleApi.addResponse(requestData).enqueue(object : Callback<ResponseBody> {
+            babbleApi.addResponse( BabbleSDKController.getInstance(this)?.userId,requestData).enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
                     response: retrofit2.Response<ResponseBody>
