@@ -27,6 +27,7 @@ internal class BabbleSDKController(context: Context) {
     private var mContext: Context? = context
 
     private var userId: String? = null
+     var surveyInstanceId: String? = null
     private var babbleCustomerId: String? = null
     private var isInitialize: Boolean = false
 
@@ -65,16 +66,18 @@ internal class BabbleSDKController(context: Context) {
             val questionList = userQuestionResponse?.filter {
                 (it.document?.fields?.surveyId?.stringValue ?: "") == surveyId
             }
+            surveyInstanceId=BabbleSdkHelper.getRandomString(10)
             val surveyInstanceRequest = SurveyInstanceRequest(
                 customerId = this.babbleCustomerId,
                 surveyId = surveyId,
                 timeVal = BabbleSdkHelper.getCurrentDate(),
                 userId = this.userId,
-                surveyInstanceId = BabbleSdkHelper.getRandomString(10)
+                surveyInstanceId = surveyInstanceId
             )
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java
             )
+            Log.e(TAG, "trigger: $surveyInstanceRequest", )
             babbleApi.createSurveyInstance(surveyInstanceRequest)
                 .enqueue(object : Callback<ResponseBody> {
                     override fun onResponse(

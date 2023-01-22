@@ -11,6 +11,8 @@ import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.babble.babblesdk.BabbleSDK
+import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
 import com.babble.babblesdk.databinding.ActivitySurveyBinding
@@ -177,7 +179,7 @@ class SurveyActivity : AppCompatActivity() {
                 questionTypeId = questionTypeId,
                 sequenceNo = (surveyResponse?.document?.fields?.sequenceNo?.integerValue
                     ?: "-1").toString(),
-                surveyInstanceId = surveyInstanceId,
+                surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
                 questionText = surveyResponse?.document?.fields?.questionText?.stringValue ?: "",
                 responseCreatedAt = date,
                 responseUpdatedAt = date,
@@ -185,6 +187,8 @@ class SurveyActivity : AppCompatActivity() {
                 shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse?.document?.name,
                 response = responseAnswer
             )
+            Log.e(TAG, "addUserResponse: $requestData", )
+
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java
             )

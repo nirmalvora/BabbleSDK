@@ -14,7 +14,7 @@ internal class MainActivity : AppCompatActivity() {
         setContentView(view)
         BabbleSDK.setCustomerId(customerId = "nirmalvora0910@gmail.com")
         binding.openSurvey.setOnClickListener {
-            BabbleSDK.triggerSurvey(trigger = "test-all-questions")
+            BabbleSDK.triggerSurvey(trigger = "mobile-test1")
         }
     }
 }
