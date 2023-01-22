@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ApiClient {
-    private const val baseUrl = "https://pri9rvopx2.execute-api.ap-south-1.amazonaws.com/prod/"
+    private const val baseUrl = "https://8a9f-208-59-183-252.ngrok.io/"
     fun getInstance(): Retrofit {
         return Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
