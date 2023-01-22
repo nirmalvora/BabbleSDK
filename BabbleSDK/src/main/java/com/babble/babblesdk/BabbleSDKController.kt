@@ -117,7 +117,7 @@ internal class BabbleSDKController(context: Context) {
                     call: Call<List<BackedEventResponse>>,
                     response: Response<List<BackedEventResponse>>
                 ) {
-                    backendEvents = response.body();
+                    backendEvents = response.body()
                 }
 
                 override fun onFailure(call: Call<List<BackedEventResponse>>, t: Throwable) {
@@ -148,17 +148,23 @@ internal class BabbleSDKController(context: Context) {
             val eventName: String? = survey?.document?.fields?.eventName?.stringValue
 
             val eventList = backendEvents?.filter {
-                val date: Date = convertStringToDate(it.document?.fields?.createdAt?.stringValue)!!
+                val date: Date? = convertStringToDate(it.document?.fields?.createdAt?.stringValue)
                 val currentDate: Date = convertStringToDate(getCurrentDate())!!
                 val calendar = Calendar.getInstance()
-                calendar.time = date;
-                calendar.add(
-                    Calendar.HOUR,
-                    Integer.parseInt(survey?.document?.fields?.relevancePeriod?.integerValue ?: "0")
-                )
-                it.document?.fields?.eventName?.stringValue == eventName && currentDate.before(
-                    calendar.time
-                )
+                var dateCheck= false
+                if(date!=null) {
+                    calendar.time = date
+                    calendar.add(
+                        Calendar.HOUR,
+                        Integer.parseInt(
+                            survey?.document?.fields?.relevancePeriod?.integerValue ?: "0"
+                        )
+                    )
+                    dateCheck=currentDate.before(
+                        calendar.time
+                    )
+                }
+                it.document?.fields?.eventName?.stringValue == eventName && dateCheck
             }
             val cohortCheck = (cohortId == null || cohortIds?.contains(
                 cohortId
@@ -199,7 +205,7 @@ internal class BabbleSDKController(context: Context) {
         val surveyInstanceRequest = SurveyInstanceRequest(
             customerId = this.babbleCustomerId,
             surveyId = surveyId,
-            timeVal = BabbleSdkHelper.getCurrentDate(),
+            timeVal = getCurrentDate(),
             userId = this.userId,
             surveyInstanceId = surveyInstanceId,
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
@@ -213,7 +219,7 @@ internal class BabbleSDKController(context: Context) {
             .enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
-                    response: retrofit2.Response<ResponseBody>
+                    response: Response<ResponseBody>
                 ) {
                 }
 
