@@ -18,10 +18,27 @@ internal object BabbleSdkHelper {
         Log.e(TAG, "Survey not found for specified trigger")
     }
 
+    fun matchingCohortNotFound() {
+        Log.e(TAG, "No matching cohorts")
+    }
+
+    fun matchingEventsNotFound() {
+        Log.e(TAG, "No matching events")
+    }
+
+
     fun getCurrentDate(): String {
         return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).format(
             Date()
         )
+    }
+
+    fun convertStringToDate(date:String?): Date? {
+        return date?.let {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).parse(
+                it
+            )
+        }
     }
 
     fun getRandomString(length: Int) : String {
@@ -29,5 +46,13 @@ internal object BabbleSdkHelper {
         return (1..length)
             .map { allowedChars.random() }
             .joinToString("")
+    }
+
+    fun getIdFromStringPath(string: String?): String? {
+        return string?.substring(
+            string.lastIndexOf('/')
+                .plus(1)
+        )
+
     }
 }
