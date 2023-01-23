@@ -95,7 +95,7 @@ internal class BabbleSDKController(context: Context) {
             BabbleApiInterface::class.java
         )
 
-        babbleApi.getCohorts(userId = this.userId).enqueue(object : Callback<List<CohortResponse>> {
+        babbleApi.getCohorts(userId = this.userId, customerId = customerId).enqueue(object : Callback<List<CohortResponse>> {
             override fun onResponse(
                 call: Call<List<CohortResponse>>,
                 response: Response<List<CohortResponse>>
@@ -134,7 +134,10 @@ internal class BabbleSDKController(context: Context) {
             }
             val triggerId = getIdFromStringPath(triggerData?.document?.name)
 
-            val survey = userSurveyResponse?.find {
+            val survey = userSurveyResponse?.sortedByDescending {
+                val date: Date? = convertStringToDate(it.document?.fields?.createdAt?.stringValue)
+                date
+            }?.find {
                 (it.document?.fields?.triggerId?.stringValue ?: "") == triggerId
             }
             val surveyId = getIdFromStringPath(survey?.document?.name)
@@ -151,25 +154,28 @@ internal class BabbleSDKController(context: Context) {
                 val date: Date? = convertStringToDate(it.document?.fields?.createdAt?.stringValue)
                 val currentDate: Date = convertStringToDate(getCurrentDate())!!
                 val calendar = Calendar.getInstance()
-                var dateCheck= false
-                if(date!=null) {
+                var dateCheck = false
+                if (date != null && survey?.document?.fields?.relevancePeriod?.integerValue != null) {
                     calendar.time = date
                     calendar.add(
                         Calendar.HOUR,
                         Integer.parseInt(
-                            survey?.document?.fields?.relevancePeriod?.integerValue ?: "0"
+                            survey.document?.fields?.relevancePeriod?.integerValue ?: "0"
                         )
                     )
-                    dateCheck=currentDate.before(
+                    dateCheck = currentDate.before(
                         calendar.time
                     )
                 }
+                if (survey?.document?.fields?.relevancePeriod?.integerValue == null) {
+                    dateCheck = true
+                }
                 it.document?.fields?.eventName?.stringValue == eventName && dateCheck
             }
-            val cohortCheck = (cohortId == null || cohortIds?.contains(
+            val cohortCheck = (cohortId == null || cohortId.isEmpty() || cohortIds?.contains(
                 cohortId
             ) == true)
-            val eventCheck = eventName == null || (eventList ?: arrayListOf()).isNotEmpty()
+            val eventCheck = eventName == null || eventName.isEmpty() || (eventList ?: arrayListOf()).isNotEmpty()
             val showSurvey =
                 questionList != null && questionList.isNotEmpty() && cohortCheck && eventCheck
 
@@ -182,18 +188,19 @@ internal class BabbleSDKController(context: Context) {
                 surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 mContext?.applicationContext?.startActivity(surveyIntent)
             } else {
-                if (cohortIds?.contains(
+                if (!cohortCheck && cohortIds?.contains(
                         cohortId
                     ) == false
                 ) {
                     BabbleSdkHelper.matchingCohortNotFound()
-                } else if ((eventList ?: arrayListOf()).isEmpty()) {
+                }
+                if (!eventCheck && (eventList ?: arrayListOf()).isEmpty()) {
                     BabbleSdkHelper.matchingEventsNotFound()
-                } else {
+                }
+                if (questionList != null && questionList.isNotEmpty()) {
                     BabbleSdkHelper.surveyNotFoundForTrigger()
                 }
             }
-
         } else {
             BabbleSdkHelper.notInitialized()
         }
@@ -211,7 +218,6 @@ internal class BabbleSDKController(context: Context) {
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
                 ?: arrayListOf()
         )
-        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest")
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )

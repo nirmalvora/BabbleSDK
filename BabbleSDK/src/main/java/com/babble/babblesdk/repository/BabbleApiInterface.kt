@@ -34,7 +34,8 @@ internal interface BabbleApiInterface {
 
     @GET("get_cohorts")
     fun getCohorts(
-        @Header("babble_user_id") userId: String?
+        @Header("babble_user_id") userId: String?,
+        @Header("customer_id") customerId: String?
     ): Call<List<CohortResponse>>
 
 
