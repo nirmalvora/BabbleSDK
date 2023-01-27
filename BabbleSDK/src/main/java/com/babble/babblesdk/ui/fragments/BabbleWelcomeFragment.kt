@@ -8,6 +8,7 @@ import android.widget.RelativeLayout
 import com.babble.babblesdk.databinding.FragmentBabbleWelcomeBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
+import com.babble.babblesdk.utils.BabbleSdkHelper
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -16,7 +17,7 @@ internal class BabbleWelcomeFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleWelcomeBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentBabbleWelcomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -51,6 +52,7 @@ internal class BabbleWelcomeFragment : BaseFragment() {
                 requireActivity().finish()
             }, 1000)
         }
+        BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
     }
 
     private fun getVisibility(text: String): Int {
@@ -66,4 +68,5 @@ internal class BabbleWelcomeFragment : BaseFragment() {
                 }
             }
     }
+
 }

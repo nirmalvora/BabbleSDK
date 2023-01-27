@@ -2,7 +2,9 @@ package com.babble.babblesdk.ui
 
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -10,8 +12,8 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.babble.babblesdk.BabbleSDK
 import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
@@ -61,6 +63,14 @@ class SurveyActivity : AppCompatActivity() {
             }
         }
         binding.pageProgressBar.max = (questionList?.size ?: 0) * 100
+        try {
+            binding.pageProgressBar.progressTintList = ColorStateList.valueOf(Color.parseColor( BabbleSDKController.getInstance(this)!!.themeColor))
+
+        } catch (nfe: NumberFormatException) {
+            BabbleSDKController.getInstance(this)!!.themeColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(this, R.color.colorPrimaryDark))
+            binding.pageProgressBar.progressTintList = ColorStateList.valueOf(Color.parseColor( BabbleSDKController.getInstance(this)!!.themeColor))
+        }
         setUpUI()
         binding.closeBtnImageView.setOnClickListener {
             finish()
@@ -186,7 +196,7 @@ class SurveyActivity : AppCompatActivity() {
                 shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse?.document?.name,
                 response = responseAnswer
             )
-            Log.e(TAG, "addUserResponse: $requestData", )
+            Log.e(TAG, "addUserResponse: $requestData")
 
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java

@@ -13,13 +13,15 @@ import com.babble.babblesdk.databinding.FragmentBabbleQueBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
+import com.babble.babblesdk.utils.BabbleSdkHelper
+
 
 internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
     private lateinit var binding: FragmentBabbleQueBinding
     private var dashboardAdapter: BabbleSurveyAdapter? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentBabbleQueBinding.inflate(inflater, container, false)
         val field = questionData.document?.fields
@@ -67,6 +69,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.surveyOptionsList.adapter = dashboardAdapter
         binding.btnLayout.nextButton.isEnabled = false
         binding.btnLayout.nextButton.isClickable = false
+        BabbleSdkHelper.submitButtonBeautification(requireActivity(),binding.btnLayout.nextButton)
         return binding.root
     }
 

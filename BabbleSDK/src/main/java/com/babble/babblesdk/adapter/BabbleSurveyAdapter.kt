@@ -1,6 +1,7 @@
 package com.babble.babblesdk.adapter
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -11,14 +12,16 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
 import com.babble.babblesdk.customWidgets.BabbleDynamicSquare
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
+import com.babble.babblesdk.utils.BabbleSdkHelper
 
 internal class BabbleSurveyAdapter(
     mContext: Context,
-    surveyFields: UserQuestionResponse, babbleClickHandler: BabbleGenericClickHandler
+    surveyFields: UserQuestionResponse, babbleClickHandler: BabbleGenericClickHandler,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val mContext: Context
     private val mInflater: LayoutInflater
@@ -107,7 +110,13 @@ internal class BabbleSurveyAdapter(
                 if (this.surveyFields?.selectedOptions?.contains(this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
                     ) == true
                 ) {
-                    gd.setColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
+                    try {
+                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                    } catch (nfe: NumberFormatException) {
+                        BabbleSDKController.getInstance(mContext)!!.themeColor =
+                            "#" + Integer.toHexString(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
+                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                    }
                     mcqHolder.title.setTextColor(
                         ContextCompat.getColor(mContext, R.color.white)
                     )
@@ -134,7 +143,13 @@ internal class BabbleSurveyAdapter(
                 val gd =
                     (ratingHolder.title.parent as RelativeLayout).background as GradientDrawable
                 if (this.surveyFields?.selectedRating == (position + 1)) {
-                    gd.setColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
+                    try {
+                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                    } catch (nfe: NumberFormatException) {
+                        BabbleSDKController.getInstance(mContext)!!.themeColor =
+                            "#" + Integer.toHexString(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
+                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                    }
                     ratingHolder.title.setTextColor(
                         ContextCompat.getColor(mContext, R.color.white)
                     )
@@ -174,13 +189,17 @@ internal class BabbleSurveyAdapter(
                 ratingsEmojiViewHolder.emoji.text = mContext.resources.getString(
                     emojis[position]
                 )
+                (ratingsEmojiViewHolder.emoji.parent
+                    .parent as BabbleDynamicSquare).setBackgroundResource(R.drawable.rounded_rectangle_unselected)
+                val gdEmojis =
+                    (ratingsEmojiViewHolder.emoji.parent
+                        .parent as BabbleDynamicSquare).background as GradientDrawable
                 if (this.surveyFields?.selectedRating == (position + 1)) {
-                    (ratingsEmojiViewHolder.emoji.parent
-                        .parent as BabbleDynamicSquare).setBackgroundResource(R.drawable.rounded_rectangle_selected)
+                    gdEmojis.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
                 } else {
-                    (ratingsEmojiViewHolder.emoji.parent
-                        .parent as BabbleDynamicSquare).setBackgroundResource(R.drawable.rounded_rectangle_unselected)
+                    gdEmojis.setColor(BabbleSdkHelper.manipulateColor(Color.parseColor("#000000"), 0.0f))
                 }
+
                 (ratingsEmojiViewHolder.emoji.parent as RelativeLayout).setOnClickListener {
                     babbleClickHandler.itemClicked(position)
                 }

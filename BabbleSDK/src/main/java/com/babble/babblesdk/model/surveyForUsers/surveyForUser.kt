@@ -1,7 +1,6 @@
 package com.babble.babblesdk.model.surveyForUsers
 
 
-import com.babble.babblesdk.model.backendEventResponse.BackedEventString
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 

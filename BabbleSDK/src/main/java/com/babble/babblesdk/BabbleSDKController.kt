@@ -32,6 +32,7 @@ import java.util.*
 internal class BabbleSDKController(context: Context) {
     private var mContext: Context? = context
     var userId: String? = null
+    var themeColor: String = "#ff8643"
     var surveyInstanceId: String? = null
     var cohortIds: List<String>? = null
     var backendEvents: List<BackedEventResponse>? = null
@@ -218,6 +219,7 @@ internal class BabbleSDKController(context: Context) {
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
                 ?: arrayListOf()
         )
+        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest", )
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )

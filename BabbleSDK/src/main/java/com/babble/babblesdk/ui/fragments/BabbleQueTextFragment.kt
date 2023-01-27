@@ -8,12 +8,13 @@ import androidx.core.widget.addTextChangedListener
 import com.babble.babblesdk.databinding.FragmentBabbleQueTextBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
+import com.babble.babblesdk.utils.BabbleSdkHelper
 
 internal class BabbleQueTextFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleQueTextBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentBabbleQueTextBinding.inflate(inflater, container, false)
         val field = questionData.document?.fields
@@ -41,6 +42,7 @@ internal class BabbleQueTextFragment : BaseFragment() {
                 binding.btnLayout.nextButton.isClickable = true
             }
         }
+        BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
         return binding.root
     }
 
@@ -57,4 +59,5 @@ internal class BabbleQueTextFragment : BaseFragment() {
                 }
             }
     }
+
 }
