@@ -8,6 +8,7 @@ import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.backendEventResponse.BackedEventResponse
 import com.babble.babblesdk.model.cohortResponse.CohortResponse
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
+import com.babble.babblesdk.model.styleForUserIdResponse.StyleForUserIdResponse
 import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
 import com.babble.babblesdk.repository.ApiClient
@@ -32,7 +33,7 @@ import java.util.*
 internal class BabbleSDKController(context: Context) {
     private var mContext: Context? = context
     var userId: String? = null
-    var themeColor: String = "#ff8643"
+    var themeColor: String = "#5D5FEF"
     var surveyInstanceId: String? = null
     var cohortIds: List<String>? = null
     var backendEvents: List<BackedEventResponse>? = null
@@ -42,6 +43,7 @@ internal class BabbleSDKController(context: Context) {
     var userSurveyResponse: List<UserSurveyResponse>? = null
     var userTriggerResponse: List<UserTriggerResponse>? = null
     var userQuestionResponse: List<UserQuestionResponse>? = null
+    var styleForUserIdResponse: List<StyleForUserIdResponse>? = null
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -64,16 +66,19 @@ internal class BabbleSDKController(context: Context) {
             babbleApi.getSurveyForUserId(this.userId),
             babbleApi.getTriggerForUserId(this.userId),
             babbleApi.getQuestionForUserId(this.userId),
+            babbleApi.getStyleForUserId(this.userId),
             object :
-                Function3<List<UserSurveyResponse>, List<UserTriggerResponse>, List<UserQuestionResponse>, Unit> {
+                Function4<List<UserSurveyResponse>, List<UserTriggerResponse>, List<UserQuestionResponse>, List<StyleForUserIdResponse>, Unit> {
                 override fun invoke(
                     p1: List<UserSurveyResponse>,
                     p2: List<UserTriggerResponse>,
-                    p3: List<UserQuestionResponse>
+                    p3: List<UserQuestionResponse>,
+                    p4: List<StyleForUserIdResponse>,
                 ) {
                     userSurveyResponse = p1
                     userTriggerResponse = p2
                     userQuestionResponse = p3
+                    styleForUserIdResponse = p4
                 }
             })
             .observeOn(AndroidSchedulers.mainThread())
@@ -82,6 +87,11 @@ internal class BabbleSDKController(context: Context) {
             .subscribe(
                 {
                     this.isInitialize = true
+                    if ((styleForUserIdResponse ?: arrayListOf()).isNotEmpty()) {
+                        themeColor =
+                            styleForUserIdResponse?.get(0)?.document?.fields?.mainColor?.stringValue
+                                ?: "#5D5FEF"
+                    }
                 },
                 {
                     BabbleSdkHelper.initializationFailed()
@@ -96,27 +106,28 @@ internal class BabbleSDKController(context: Context) {
             BabbleApiInterface::class.java
         )
 
-        babbleApi.getCohorts(userId = this.userId, customerId = customerId).enqueue(object : Callback<List<CohortResponse>> {
-            override fun onResponse(
-                call: Call<List<CohortResponse>>,
-                response: Response<List<CohortResponse>>
-            ) {
-                cohortIds =
-                    response.body()
-                        ?.map { getIdFromStringPath(it.document?.name) ?: "" }
-                        ?: arrayListOf()
-            }
+        babbleApi.getCohorts(userId = this.userId, customerId = customerId)
+            .enqueue(object : Callback<List<CohortResponse>> {
+                override fun onResponse(
+                    call: Call<List<CohortResponse>>,
+                    response: Response<List<CohortResponse>>,
+                ) {
+                    cohortIds =
+                        response.body()
+                            ?.map { getIdFromStringPath(it.document?.name) ?: "" }
+                            ?: arrayListOf()
+                }
 
-            override fun onFailure(call: Call<List<CohortResponse>>, t: Throwable) {
-                Log.e(TAG, "getCohorts: onFailure: $t")
-            }
-        })
+                override fun onFailure(call: Call<List<CohortResponse>>, t: Throwable) {
+                    Log.e(TAG, "getCohorts: onFailure: $t")
+                }
+            })
 
         babbleApi.getBackendEvents(userId = this.userId, customerId = customerId)
             .enqueue(object : Callback<List<BackedEventResponse>> {
                 override fun onResponse(
                     call: Call<List<BackedEventResponse>>,
-                    response: Response<List<BackedEventResponse>>
+                    response: Response<List<BackedEventResponse>>,
                 ) {
                     backendEvents = response.body()
                 }
@@ -176,7 +187,8 @@ internal class BabbleSDKController(context: Context) {
             val cohortCheck = (cohortId == null || cohortId.isEmpty() || cohortIds?.contains(
                 cohortId
             ) == true)
-            val eventCheck = eventName == null || eventName.isEmpty() || (eventList ?: arrayListOf()).isNotEmpty()
+            val eventCheck = eventName == null || eventName.isEmpty() || (eventList
+                ?: arrayListOf()).isNotEmpty()
             val showSurvey =
                 questionList != null && questionList.isNotEmpty() && cohortCheck && eventCheck
 
@@ -219,7 +231,7 @@ internal class BabbleSDKController(context: Context) {
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
                 ?: arrayListOf()
         )
-        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest", )
+        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest")
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
@@ -227,7 +239,7 @@ internal class BabbleSDKController(context: Context) {
             .enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
-                    response: Response<ResponseBody>
+                    response: Response<ResponseBody>,
                 ) {
                 }
 

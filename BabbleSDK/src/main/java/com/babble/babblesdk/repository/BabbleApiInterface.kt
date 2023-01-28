@@ -5,6 +5,7 @@ import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.backendEventResponse.BackedEventResponse
 import com.babble.babblesdk.model.cohortResponse.CohortResponse
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
+import com.babble.babblesdk.model.styleForUserIdResponse.StyleForUserIdResponse
 import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
 import io.reactivex.Observable
@@ -47,4 +48,7 @@ internal interface BabbleApiInterface {
 
     @GET("get_questions_for_user_id")
     fun getQuestionForUserId(@Header("user_id") userId: String?): Observable<List<UserQuestionResponse>>
+
+    @GET("get_styles_for_user_id")
+    fun getStyleForUserId(@Header("user_id") userId: String?): Observable<List<StyleForUserIdResponse>>
 }
