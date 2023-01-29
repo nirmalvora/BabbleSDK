@@ -32,7 +32,7 @@ data class UserSurveyFields(
     @SerializedName("updated_at") var updatedAt: UserSurveyString? = UserSurveyString(),
     @SerializedName("end_date") var endDate: UserSurveyString? = UserSurveyString(),
     @SerializedName("event_name") var eventName: UserSurveyString? = UserSurveyString(),
-    @SerializedName("relevance_period") var relevancePeriod: UserSurveyInteger? = UserSurveyInteger(),
+    @SerializedName("relevance_period") var relevancePeriod: UserSurveyString? = UserSurveyString(),
     @SerializedName("cohort_id") var cohortId: UserSurveyString? = UserSurveyString()
 
 ) : Serializable
@@ -40,11 +40,5 @@ data class UserSurveyFields(
 data class UserSurveyString(
 
     @SerializedName("stringValue") var stringValue: String? = null
-
-) : Serializable
-
-data class UserSurveyInteger(
-
-    @SerializedName("integerValue") var integerValue: String? = null
 
 ) : Serializable

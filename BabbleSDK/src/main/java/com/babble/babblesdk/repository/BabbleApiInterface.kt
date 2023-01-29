@@ -1,6 +1,8 @@
 package com.babble.babblesdk.repository
 
 import com.babble.babblesdk.model.AddResponseRequest
+import com.babble.babblesdk.model.EligibleSurveyRequest
+import com.babble.babblesdk.model.EligibleSurveyResponse.EligibleSurveyResponse
 import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.backendEventResponse.BackedEventResponse
 import com.babble.babblesdk.model.cohortResponse.CohortResponse
@@ -51,4 +53,7 @@ internal interface BabbleApiInterface {
 
     @GET("get_styles_for_user_id")
     fun getStyleForUserId(@Header("user_id") userId: String?): Observable<List<StyleForUserIdResponse>>
+
+    @POST("eligible_survey_ids")
+    fun getEligibleSurveyIds(@Body body: EligibleSurveyRequest): Call<EligibleSurveyResponse>
 }

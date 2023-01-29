@@ -35,6 +35,9 @@ internal object BabbleSdkHelper {
         Log.e(TAG, "No matching events")
     }
 
+    fun notEligibleSurvey() {
+        Log.e(TAG, "Given survey id is not eligible")
+    }
 
     fun getCurrentDate(): String {
         return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).format(
