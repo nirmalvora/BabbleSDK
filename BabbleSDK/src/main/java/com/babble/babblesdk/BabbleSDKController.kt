@@ -115,7 +115,6 @@ internal class BabbleSDKController(context: Context) {
                     call: Call<List<CohortResponse>>,
                     response: Response<List<CohortResponse>>,
                 ) {
-                    Log.e(TAG, "getCohorts: onFailure: ${response.code()}")
                     cohortIds =
                         response.body()
                             ?.map { getIdFromStringPath(it.document?.name) ?: "" }
