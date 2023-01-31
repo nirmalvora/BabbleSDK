@@ -68,5 +68,4 @@ internal class BabbleWelcomeFragment : BaseFragment() {
                 }
             }
     }
-
 }

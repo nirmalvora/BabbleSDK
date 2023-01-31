@@ -212,8 +212,10 @@ internal class BabbleSDKController(context: Context) {
                 val cohortCheck = (cohortId == null || cohortId.isEmpty() || cohortIds?.contains(
                     cohortId
                 ) == true)
+
                 val eventCheck = eventName == null || eventName.isEmpty() || (eventList
                     ?: arrayListOf()).isNotEmpty()
+
                 val showSurvey =
                     questionList != null && questionList.isNotEmpty() && cohortCheck && eventCheck
 

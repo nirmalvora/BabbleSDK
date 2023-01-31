@@ -196,8 +196,6 @@ class SurveyActivity : AppCompatActivity() {
                 shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse?.document?.name,
                 response = responseAnswer
             )
-            Log.e(TAG, "addUserResponse: $requestData")
-
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java
             )
