@@ -34,7 +34,7 @@ class BabbleSDK(activity: Context) {
             }
         }
 
-        fun setCustomerId(customerId: String) {
+        fun setCustomerId(customerId: String?) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
                     ?.setCustomerId(customerId = customerId)

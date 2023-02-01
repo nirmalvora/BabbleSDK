@@ -67,8 +67,8 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.surveyOptionsList.layoutManager = mLayoutManager
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
         binding.surveyOptionsList.adapter = dashboardAdapter
-        binding.btnLayout.nextButton.isEnabled = false
-        binding.btnLayout.nextButton.isClickable = false
+//        binding.btnLayout.nextButton.isEnabled = false
+//        binding.btnLayout.nextButton.isClickable = false
         BabbleSdkHelper.submitButtonBeautification(requireActivity(),binding.btnLayout.nextButton)
         return binding.root
     }
@@ -123,7 +123,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
             }
         }
         dashboardAdapter!!.notifyMyList(questionData)
-        checkIfNextButtonEnabled()
+//        checkIfNextButtonEnabled()
     }
 
     private fun checkIfNextButtonEnabled() {

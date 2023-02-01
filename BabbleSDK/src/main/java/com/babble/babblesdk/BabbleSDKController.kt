@@ -100,16 +100,15 @@ internal class BabbleSDKController(context: Context) {
                     BabbleSdkHelper.initializationFailed()
                 }
             )
-
     }
 
-    fun setCustomerId(customerId: String) {
-        this.babbleCustomerId = customerId
+    fun setCustomerId(customerId: String?) {
+        this.babbleCustomerId = customerId ?: ""
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
 
-        babbleApi.getCohorts(userId = this.userId, customerId = customerId)
+        babbleApi.getCohorts(userId = this.userId, customerId =  this.babbleCustomerId)
             .enqueue(object : Callback<List<CohortResponse>> {
                 override fun onResponse(
                     call: Call<List<CohortResponse>>,
@@ -126,7 +125,7 @@ internal class BabbleSDKController(context: Context) {
                 }
             })
 
-        babbleApi.getBackendEvents(userId = this.userId, customerId = customerId)
+        babbleApi.getBackendEvents(userId = this.userId, customerId =  this.babbleCustomerId)
             .enqueue(object : Callback<List<BackedEventResponse>> {
                 override fun onResponse(
                     call: Call<List<BackedEventResponse>>,
@@ -141,7 +140,7 @@ internal class BabbleSDKController(context: Context) {
             })
 
         val eligibleSurveyRequest =
-            EligibleSurveyRequest(babbleUserId = this.userId, customerId = customerId)
+            EligibleSurveyRequest(babbleUserId = this.userId, customerId =  this.babbleCustomerId)
         babbleApi.getEligibleSurveyIds(eligibleSurveyRequest)
             .enqueue(object : Callback<EligibleSurveyResponse> {
                 override fun onResponse(
@@ -155,7 +154,6 @@ internal class BabbleSDKController(context: Context) {
                     Log.e(TAG, "getCohorts: onFailure: $t")
                 }
             })
-
     }
 
     fun trigger(trigger: String) {
@@ -262,7 +260,6 @@ internal class BabbleSDKController(context: Context) {
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
                 ?: arrayListOf()
         )
-        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest")
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
