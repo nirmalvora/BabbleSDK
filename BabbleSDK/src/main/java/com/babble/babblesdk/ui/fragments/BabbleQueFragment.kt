@@ -44,10 +44,14 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.ratingsNotLike.text = ratingsNotLike
         binding.ratingsFullLike.visibility = getVisibility(ratingsFullLike)
         binding.ratingsNotLike.visibility = getVisibility(ratingsNotLike)
-
+        binding.btnLayout.nextButton.visibility = View.GONE
         val mLayoutManager: RecyclerView.LayoutManager =
             when (questionData.document?.fields?.questionTypeId?.integerValue ?: "9") {
-                "1", "2" -> {
+                "1" -> {
+                    binding.btnLayout.nextButton.visibility = View.VISIBLE
+                    LinearLayoutManager(activity)
+                }
+                "2" -> {
                     LinearLayoutManager(activity)
                 }
                 "4" -> {
@@ -67,8 +71,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.surveyOptionsList.layoutManager = mLayoutManager
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
         binding.surveyOptionsList.adapter = dashboardAdapter
-//        binding.btnLayout.nextButton.isEnabled = false
-//        binding.btnLayout.nextButton.isClickable = false
+
         BabbleSdkHelper.submitButtonBeautification(requireActivity(),binding.btnLayout.nextButton)
         return binding.root
     }
@@ -113,6 +116,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                     questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
                         ?: ""
                 )
+                surveyActivity!!.addUserResponse(questionData)
             }
             "4", "5", "7", "8" -> {
                 if (questionData.selectedRating == (position + 1)) {
@@ -120,6 +124,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                 } else {
                     questionData.selectedRating = (position + 1)
                 }
+                surveyActivity!!.addUserResponse(questionData)
             }
         }
         dashboardAdapter!!.notifyMyList(questionData)
