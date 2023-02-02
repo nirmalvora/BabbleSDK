@@ -23,13 +23,6 @@ internal open class BaseFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        questionData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            requireArguments().getSerializable(
-                BabbleConstants.questionData,
-                UserQuestionResponse::class.java
-            )!!
-        else
-            requireArguments().getSerializable(BabbleConstants.questionData) as UserQuestionResponse
-
+        questionData = requireArguments().getSerializable(BabbleConstants.questionData) as UserQuestionResponse
     }
 }
