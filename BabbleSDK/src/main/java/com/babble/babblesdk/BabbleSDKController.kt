@@ -101,8 +101,8 @@ internal class BabbleSDKController(context: Context) {
                 }
             )
     }
-
-    fun setCustomerId(customerId: String?) {
+    // add properties
+    fun setCustomerId(customerId: String?, userDetails:HashMap<String, Any>? ) {
         this.babbleCustomerId = customerId ?: ""
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java

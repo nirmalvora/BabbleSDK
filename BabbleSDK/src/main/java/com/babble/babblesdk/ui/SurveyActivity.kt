@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -26,6 +27,7 @@ import com.babble.babblesdk.ui.fragments.BabbleQueFragment
 import com.babble.babblesdk.ui.fragments.BabbleQueTextFragment
 import com.babble.babblesdk.ui.fragments.BabbleWelcomeFragment
 import com.babble.babblesdk.utils.BabbleConstants
+import com.babble.babblesdk.utils.BabbleSdkHelper
 import com.babble.babblesdk.utils.BabbleSdkHelper.getCurrentDate
 import com.google.gson.Gson
 import okhttp3.ResponseBody
@@ -64,12 +66,18 @@ class SurveyActivity : AppCompatActivity() {
         }
         binding.pageProgressBar.max = (questionList?.size ?: 0) * 100
         try {
-            binding.pageProgressBar.progressTintList = ColorStateList.valueOf(Color.parseColor( BabbleSDKController.getInstance(this)!!.themeColor))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                binding.pageProgressBar.progressTintList =
+                    ColorStateList.valueOf(Color.parseColor(BabbleSDKController.getInstance(this)!!.themeColor))
+            }
 
         } catch (nfe: NumberFormatException) {
             BabbleSDKController.getInstance(this)!!.themeColor =
                 "#" + Integer.toHexString(ContextCompat.getColor(this, R.color.colorPrimaryDark))
-            binding.pageProgressBar.progressTintList = ColorStateList.valueOf(Color.parseColor( BabbleSDKController.getInstance(this)!!.themeColor))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                binding.pageProgressBar.progressTintList =
+                    ColorStateList.valueOf(Color.parseColor(BabbleSDKController.getInstance(this)!!.themeColor))
+            }
         }
         setUpUI()
         binding.closeBtnImageView.setOnClickListener {
@@ -117,7 +125,9 @@ class SurveyActivity : AppCompatActivity() {
             (questionId + 1) * 100
         )
         animation.duration = 500
-        animation.setAutoCancel(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            animation.setAutoCancel(true)
+        }
         animation.interpolator = DecelerateInterpolator()
         animation.start()
     }
@@ -153,21 +163,13 @@ class SurveyActivity : AppCompatActivity() {
 
     fun addUserResponse(surveyResponse: UserQuestionResponse?) {
 
-        if (questionId == (questionList?.size ?: 0) - 1) {
-            finish()
-        } else {
-            if ((questionList?.size ?: 0) - 1 > questionId) {
-                questionId++
-                setUpUI()
-            }
-        }
         val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue
             ?: "9"
         if (questionTypeId != "6" && questionTypeId != "9") {
             val tempQuestionList =
                 questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
 
-            var responseAnswer:String? = ""
+            var responseAnswer: String? = ""
             when (questionTypeId) {
                 "1", "2" -> {
                     responseAnswer =
@@ -177,29 +179,30 @@ class SurveyActivity : AppCompatActivity() {
                     responseAnswer = surveyResponse?.answerText ?: ""
                 }
                 "4", "5", "7", "8" -> {
-                    responseAnswer = if(surveyResponse?.selectedRating != null) {
+                    responseAnswer = if (surveyResponse?.selectedRating != null) {
                         surveyResponse.selectedRating.toString()
-                    }else{
+                    } else {
                         null
                     }
                 }
             }
-            if(responseAnswer != null &&responseAnswer.isNotEmpty()) {
+            setNextQuestion(surveyResponse!!,responseAnswer)
+            if (responseAnswer != null && responseAnswer.isNotEmpty()) {
 
-                val surveyId = surveyResponse?.document?.fields?.surveyId?.stringValue
+                val surveyId = surveyResponse.document?.fields?.surveyId?.stringValue
                 val date: String = getCurrentDate()
                 val requestData = AddResponseRequest(
                     surveyId = surveyId,
                     questionTypeId = Integer.parseInt(questionTypeId),
-                    sequenceNo = Integer.parseInt((surveyResponse?.document?.fields?.sequenceNo?.integerValue
+                    sequenceNo = Integer.parseInt((surveyResponse.document?.fields?.sequenceNo?.integerValue
                         ?: "-1").toString()),
                     surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
-                    questionText = surveyResponse?.document?.fields?.questionText?.stringValue
+                    questionText = surveyResponse.document?.fields?.questionText?.stringValue
                         ?: "",
                     responseCreatedAt = date,
                     responseUpdatedAt = date,
-                    shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse?.document?.name,
-                    shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse?.document?.name,
+                    shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse.document?.name,
+                    shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse.document?.name,
                     response = responseAnswer
                 )
                 val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
@@ -209,7 +212,7 @@ class SurveyActivity : AppCompatActivity() {
                     .enqueue(object : Callback<ResponseBody> {
                         override fun onResponse(
                             call: Call<ResponseBody>,
-                            response: retrofit2.Response<ResponseBody>
+                            response: retrofit2.Response<ResponseBody>,
                         ) {
                             Log.e(TAG, "Survey response saved.")
                         }
@@ -219,13 +222,37 @@ class SurveyActivity : AppCompatActivity() {
                         }
                     })
             }
+        } else {
+            setNextQuestion(surveyResponse!!, "")
+        }
+    }
+
+    private fun setNextQuestion(surveyResponse: UserQuestionResponse, responseAnswer: String?) {
+        if (questionId == (questionList?.size ?: 0) - 1) {
+            finish()
+        } else {
+            if (surveyResponse.document?.fields?.nextQuestion != null&&surveyResponse.document?.fields?.nextQuestion?.get("mapValue")?.get("fields")?.get(responseAnswer) != null) {
+                for (i in questionId until (questionList!!.size)) {
+                    if(BabbleSdkHelper.getIdFromStringPath(questionList!![i].document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"])
+                    {
+                        questionId=i
+                        setUpUI()
+                        break
+                    }
+                }
+            } else if ((questionList?.size ?: 0) - 1 > questionId) {
+                questionId++
+                setUpUI()
+            }
         }
     }
 
     override fun attachBaseContext(newBase: Context?) {
         val newOverride = Configuration(newBase?.resources?.configuration)
         newOverride.fontScale = 1.0f
-        applyOverrideConfiguration(newOverride)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            applyOverrideConfiguration(newOverride)
+        }
         super.attachBaseContext(newBase)
     }
 }

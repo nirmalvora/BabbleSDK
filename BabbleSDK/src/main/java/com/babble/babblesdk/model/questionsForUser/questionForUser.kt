@@ -1,5 +1,6 @@
 package com.babble.babblesdk.model.questionsForUser
 
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -18,9 +19,9 @@ data class UserQuestionDocument(
     @SerializedName("name") var name: String? = null,
     @SerializedName("fields") var fields: UserQuestionFields? = UserQuestionFields(),
     @SerializedName("createTime") var createTime: String? = null,
-    @SerializedName("updateTime") var updateTime: String? = null
+    @SerializedName("updateTime") var updateTime: String? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class UserQuestionFields(
     @SerializedName("user_id") var userId: UserQuestionString? = UserQuestionString(),
@@ -36,48 +37,49 @@ data class UserQuestionFields(
     @SerializedName("question_desc") var questionDesc: UserQuestionString? = UserQuestionString(),
     @SerializedName("max_val_description") var maxValDescription: UserQuestionString? = UserQuestionString(),
     @SerializedName("min_val_description") var minValDescription: UserQuestionString? = UserQuestionString(),
-    @SerializedName("answers") var answers: Answers? = Answers()
+    @SerializedName("answers") var answers: Answers? = Answers(),
+    @SerializedName("next_question") @Expose var nextQuestion: Map<String, Map<String, Map<String, Map<String, String>>>>? = HashMap(),
 
-) : Serializable
+    ) : Serializable
 
 data class UserQuestionString(
 
-    @SerializedName("stringValue") var stringValue: String? = null
+    @SerializedName("stringValue") var stringValue: String? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class UserQuestionBoolean(
 
-    @SerializedName("booleanValue") var stringValue: Boolean? = null
+    @SerializedName("booleanValue") var stringValue: Boolean? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class UserQuestionInteger(
 
-    @SerializedName("integerValue") var integerValue: String? = null
+    @SerializedName("integerValue") var integerValue: String? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class SequenceNo(
 
-    @SerializedName("integerValue") var integerValue: String? = null
+    @SerializedName("integerValue") var integerValue: String? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class TemplateId(
 
-    @SerializedName("nullValue") var nullValue: String? = null
+    @SerializedName("nullValue") var nullValue: String? = null,
 
-) : Serializable
+    ) : Serializable
 
 data class Answers(
 
-    @SerializedName("arrayValue") var arrayValue: ArrayValue? = ArrayValue()
+    @SerializedName("arrayValue") var arrayValue: ArrayValue? = ArrayValue(),
 
-) : Serializable
+    ) : Serializable
 
 data class ArrayValue(
 
-    @SerializedName("values") var values: ArrayList<UserQuestionString> = arrayListOf()
+    @SerializedName("values") var values: ArrayList<UserQuestionString> = arrayListOf(),
 
-) : Serializable
+    ) : Serializable
