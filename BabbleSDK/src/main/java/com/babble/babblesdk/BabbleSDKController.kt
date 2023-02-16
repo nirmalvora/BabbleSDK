@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.babble.babblesdk.model.CustomerPropertiesRequest
 import com.babble.babblesdk.model.EligibleSurveyRequest
 import com.babble.babblesdk.model.EligibleSurveyResponse.EligibleSurveyResponse
 import com.babble.babblesdk.model.SurveyInstanceRequest
@@ -101,14 +102,15 @@ internal class BabbleSDKController(context: Context) {
                 }
             )
     }
+
     // add properties
-    fun setCustomerId(customerId: String?, userDetails:HashMap<String, Any>? ) {
+    fun setCustomerId(customerId: String?, userDetails: HashMap<String, Any?>? = null) {
         this.babbleCustomerId = customerId ?: ""
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
 
-        babbleApi.getCohorts(userId = this.userId, customerId =  this.babbleCustomerId)
+        babbleApi.getCohorts(userId = this.userId, customerId = this.babbleCustomerId)
             .enqueue(object : Callback<List<CohortResponse>> {
                 override fun onResponse(
                     call: Call<List<CohortResponse>>,
@@ -125,7 +127,7 @@ internal class BabbleSDKController(context: Context) {
                 }
             })
 
-        babbleApi.getBackendEvents(userId = this.userId, customerId =  this.babbleCustomerId)
+        babbleApi.getBackendEvents(userId = this.userId, customerId = this.babbleCustomerId)
             .enqueue(object : Callback<List<BackedEventResponse>> {
                 override fun onResponse(
                     call: Call<List<BackedEventResponse>>,
@@ -140,7 +142,7 @@ internal class BabbleSDKController(context: Context) {
             })
 
         val eligibleSurveyRequest =
-            EligibleSurveyRequest(babbleUserId = this.userId, customerId =  this.babbleCustomerId)
+            EligibleSurveyRequest(babbleUserId = this.userId, customerId = this.babbleCustomerId)
         babbleApi.getEligibleSurveyIds(eligibleSurveyRequest)
             .enqueue(object : Callback<EligibleSurveyResponse> {
                 override fun onResponse(
@@ -154,9 +156,25 @@ internal class BabbleSDKController(context: Context) {
                     Log.e(TAG, "getCohorts: onFailure: $t")
                 }
             })
+        if (userDetails != null) {
+            babbleApi.setCustomerProperties(CustomerPropertiesRequest(userId = this.userId,
+                customerId = this.babbleCustomerId,
+                properties = userDetails))
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>,
+                    ) {
+                    }
+
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e(TAG, "createSurveyInstance: onFailure: $t")
+                    }
+                })
+        }
     }
 
-    fun trigger(trigger: String) {
+    fun trigger(trigger: String, properties: HashMap<String, Any?>? = null) {
         if (isInitialize) {
             val triggerData = userTriggerResponse?.find {
                 (it.document?.fields?.name?.stringValue ?: "") == trigger
@@ -170,7 +188,8 @@ internal class BabbleSDKController(context: Context) {
                 (it.document?.fields?.triggerId?.stringValue ?: "") == triggerId
             }
             val surveyId = getIdFromStringPath(survey?.document?.name)
-            val isEligibleSurvey =(eligibleSurveyResponse?.eligibleSurveyIds?: arrayListOf()).contains(surveyId)
+            val isEligibleSurvey =
+                (eligibleSurveyResponse?.eligibleSurveyIds ?: arrayListOf()).contains(surveyId)
             if (isEligibleSurvey) {
                 val questionList = userQuestionResponse?.filter {
                     (it.document?.fields?.surveyId?.stringValue ?: "") == surveyId
@@ -218,7 +237,9 @@ internal class BabbleSDKController(context: Context) {
                     questionList != null && questionList.isNotEmpty() && cohortCheck && eventCheck
 
                 if (showSurvey) {
-                    createSurveyInstance(surveyId = surveyId, eventList = eventList)
+                    createSurveyInstance(surveyId = surveyId,
+                        eventList = eventList,
+                        properties = properties)
                     val surveyIntent =
                         Intent(mContext!!.applicationContext, SurveyActivity::class.java)
                     surveyIntent.putExtra(
@@ -248,7 +269,11 @@ internal class BabbleSDKController(context: Context) {
         }
     }
 
-    private fun createSurveyInstance(surveyId: String?, eventList: List<BackedEventResponse>?) {
+    private fun createSurveyInstance(
+        surveyId: String?,
+        eventList: List<BackedEventResponse>?,
+        properties: HashMap<String, Any?>?,
+    ) {
 
         surveyInstanceId = BabbleSdkHelper.getRandomString(10)
         val surveyInstanceRequest = SurveyInstanceRequest(
@@ -258,8 +283,10 @@ internal class BabbleSDKController(context: Context) {
             userId = this.userId,
             surveyInstanceId = surveyInstanceId,
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
-                ?: arrayListOf()
+                ?: arrayListOf(),
+            properties = properties
         )
+        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest" )
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )

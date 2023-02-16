@@ -25,19 +25,19 @@ class BabbleSDK(activity: Context) {
             }
         }
 
-        fun triggerSurvey(trigger: String) {
+        fun triggerSurvey(trigger: String, properties: HashMap<String, Any?>? = null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.trigger(trigger = trigger)
+                    ?.trigger(trigger = trigger,properties = properties)
             } else {
                 BabbleSdkHelper.notInitialized()
             }
         }
 
-        fun setCustomerId(customerId: String?) {
+        fun setCustomerId(customerId: String?, userDetails: HashMap<String, Any?>? = null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.setCustomerId(customerId = customerId,null)
+                    ?.setCustomerId(customerId = customerId,userDetails = userDetails)
             }
         }
     }

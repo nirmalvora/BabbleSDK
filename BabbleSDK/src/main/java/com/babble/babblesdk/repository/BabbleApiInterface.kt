@@ -1,6 +1,7 @@
 package com.babble.babblesdk.repository
 
 import com.babble.babblesdk.model.AddResponseRequest
+import com.babble.babblesdk.model.CustomerPropertiesRequest
 import com.babble.babblesdk.model.EligibleSurveyRequest
 import com.babble.babblesdk.model.EligibleSurveyResponse.EligibleSurveyResponse
 import com.babble.babblesdk.model.SurveyInstanceRequest
@@ -56,4 +57,9 @@ internal interface BabbleApiInterface {
 
     @POST("eligible_survey_ids")
     fun getEligibleSurveyIds(@Body body: EligibleSurveyRequest): Call<EligibleSurveyResponse>
+
+    @POST("set_customer_properties")
+    fun setCustomerProperties(
+        @Body request: CustomerPropertiesRequest
+    ): Call<ResponseBody>
 }
