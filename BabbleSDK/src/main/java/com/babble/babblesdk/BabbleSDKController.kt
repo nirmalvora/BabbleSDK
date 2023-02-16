@@ -284,9 +284,9 @@ internal class BabbleSDKController(context: Context) {
             surveyInstanceId = surveyInstanceId,
             backendEventIds = eventList?.map { getIdFromStringPath(it.document?.name) ?: "" }
                 ?: arrayListOf(),
-            properties = properties
+            properties = properties,
+            devicePlatform = "Android"
         )
-        Log.e(TAG, "createSurveyInstance: $surveyInstanceRequest" )
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
