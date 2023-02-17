@@ -232,18 +232,22 @@ class SurveyActivity : AppCompatActivity() {
             finish()
         } else {
             if (surveyResponse.document?.fields?.nextQuestion != null&&surveyResponse.document?.fields?.nextQuestion?.get("mapValue")?.get("fields")?.get(responseAnswer) != null) {
+
+            if((surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"])!!.lowercase() == "end"){
+                finish()
+            }else {
                 for (i in questionId until (questionList!!.size)) {
-                    if(BabbleSdkHelper.getIdFromStringPath(questionList!![i].document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"])
-                    {
-                        questionId=i
+                    if (BabbleSdkHelper.getIdFromStringPath(questionList!![i].document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"]) {
+                        questionId = i
                         setUpUI()
                         break
-                    } else if(i == (questionList!!.size-1)) {
+                    } else if (i == (questionList!!.size - 1)) {
                         questionId++
                         setUpUI()
                         break
                     }
                 }
+            }
             } else if ((questionList?.size ?: 0) - 1 > questionId) {
                 questionId++
                 setUpUI()
