@@ -238,6 +238,10 @@ class SurveyActivity : AppCompatActivity() {
                         questionId=i
                         setUpUI()
                         break
+                    } else if(i == (questionList!!.size-1)) {
+                        questionId++
+                        setUpUI()
+                        break
                     }
                 }
             } else if ((questionList?.size ?: 0) - 1 > questionId) {

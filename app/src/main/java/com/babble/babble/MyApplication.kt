@@ -6,6 +6,6 @@ import com.babble.babblesdk.BabbleSDK
 class MyApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        BabbleSDK.init(this, "TiHprDYCQy9UANrWWcA3")
+        BabbleSDK.init(this, "1PilLLqANCHjpAvTUhFt")
     }
 }

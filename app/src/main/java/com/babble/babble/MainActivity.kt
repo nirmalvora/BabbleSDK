@@ -12,9 +12,13 @@ internal class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        BabbleSDK.setCustomerId(customerId = "cust555")
+        val mapValue: HashMap<String, Any?> = HashMap()
+        mapValue.put("testKey1","testValue")
+        mapValue.put("testKey2","testValue")
+        mapValue.put("testKey3","testValue")
+        BabbleSDK.setCustomerId(customerId = "cust007", userDetails = mapValue)
         binding.openSurvey.setOnClickListener {
-            BabbleSDK.triggerSurvey(trigger = "cohort-test-1")
+            BabbleSDK.triggerSurvey(trigger = "skiplogic2", properties = mapValue)
         }
     }
 }
