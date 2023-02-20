@@ -161,8 +161,6 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     fun addUserResponse(surveyResponse: UserQuestionResponse?) {
-
-
         val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue
             ?: "9"
         var responseAnswer: String? = ""
@@ -287,7 +285,6 @@ class SurveyActivity : AppCompatActivity() {
                 nextQuestionTracker = ((questionList!![questionId].document?.fields?.questionTypeId?.integerValue
                     ?: "") != "9")&&hasNextQuestion
             )
-            Log.e(TAG, "writeSurveyResponse: $requestData" )
             val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                 BabbleApiInterface::class.java
             )
