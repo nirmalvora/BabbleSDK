@@ -15,5 +15,6 @@ data class AddResponseRequest(
     @SerializedName("response_updated_at") var responseUpdatedAt: String? = null,
     @SerializedName("should_mark_complete") var shouldMarkComplete: Boolean? = null,
     @SerializedName("should_mark_partial") var shouldMarkPartial: Boolean? = null,
+    @SerializedName("next_question_tracker") var nextQuestionTracker: Boolean? = null,
     @SerializedName("response") var response: String? = null
 ) : Serializable

@@ -107,7 +107,6 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                         questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
                             ?: ""
                     )
-
                 }
             }
             "2" -> {

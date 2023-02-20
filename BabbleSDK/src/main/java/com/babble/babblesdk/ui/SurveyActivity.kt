@@ -28,7 +28,6 @@ import com.babble.babblesdk.ui.fragments.BabbleQueTextFragment
 import com.babble.babblesdk.ui.fragments.BabbleWelcomeFragment
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleSdkHelper
-import com.babble.babblesdk.utils.BabbleSdkHelper.getCurrentDate
 import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -133,8 +132,8 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        super.finish()
         overridePendingTransition(R.anim.nothing, R.anim.slide_down_new_theme)
+        super.finish()
     }
 
     private fun getFragment(): Fragment? {
@@ -163,34 +162,112 @@ class SurveyActivity : AppCompatActivity() {
 
     fun addUserResponse(surveyResponse: UserQuestionResponse?) {
 
+
         val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue
             ?: "9"
-        if (questionTypeId != "6" && questionTypeId != "9") {
-            val tempQuestionList =
-                questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
+        var responseAnswer: String? = ""
+        var responseForNextQuestion: String? = ""
+        when (questionTypeId) {
+            "1", "2" -> {
+                if ((surveyResponse?.selectedOptions ?: arrayListOf()).isNotEmpty()) {
+                    val orderById = (surveyResponse?.document?.fields?.answers?.arrayValue?.values
+                        ?: arrayListOf()).withIndex()
+                        .associate { (index, it) -> it.stringValue to index }
+                    val sortedPeople = (surveyResponse?.selectedOptions
+                        ?: arrayListOf()).sortedBy { orderById[it] }
+                    responseForNextQuestion = sortedPeople[0]
+                }
+                responseAnswer =
+                    surveyResponse?.selectedOptions?.joinToString { it -> it }
+            }
+            "3" -> {
+                responseAnswer = surveyResponse?.answerText ?: ""
+                responseForNextQuestion = responseAnswer
+            }
+            "4", "5", "7", "8" -> {
+                responseAnswer = if (surveyResponse?.selectedRating != null) {
+                    surveyResponse.selectedRating.toString()
+                } else {
+                    null
+                }
+                responseForNextQuestion = responseAnswer
+            }
+        }
+        setNextQuestion(surveyResponse!!, responseForNextQuestion, responseAnswer)
+    }
 
-            var responseAnswer: String? = ""
-            when (questionTypeId) {
-                "1", "2" -> {
-                    responseAnswer =
-                        surveyResponse?.selectedOptions?.joinToString { it -> it }
-                }
-                "3" -> {
-                    responseAnswer = surveyResponse?.answerText ?: ""
-                }
-                "4", "5", "7", "8" -> {
-                    responseAnswer = if (surveyResponse?.selectedRating != null) {
-                        surveyResponse.selectedRating.toString()
+    private fun setNextQuestion(
+        surveyResponse: UserQuestionResponse,
+        checkForNextQuestion: String?,
+        responseAnswer: String?,
+    ) {
+        if (questionId == (questionList?.size ?: 0) - 1) {
+            finish()
+        } else {
+            if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
+                    "mapValue")?.get("fields")
+                    ?.get(checkForNextQuestion) != null || surveyResponse.document?.fields?.nextQuestion?.get(
+                    "mapValue")?.get("fields")?.get("any") != null)
+            ) {
+                if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue")?.get("fields")
+                        ?.get(checkForNextQuestion)?.get("stringValue")
+                        ?: "").lowercase() == "end"
+                ) {
+                    finish()
+                } else {
+                    val index =
+                        questionList!!.subList(questionId, (questionList ?: arrayListOf()).size)
+                            .indexOfFirst {
+                                if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue")?.get("fields")
+                                        ?.get(checkForNextQuestion)?.get("stringValue")
+                                        ?: "") != ""
+                                ) {
+                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![checkForNextQuestion]!!["stringValue"]
+                                } else if (surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue")?.get("fields")?.get("any") != null
+                                ) {
+                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue")?.get("fields")?.get("any")?.get("stringValue")
+                                } else {
+                                    false
+                                }
+                            }
+                    if (index != -1) {
+                        questionId += index
                     } else {
-                        null
+                        questionId++
                     }
                 }
+                writeSurveyResponse(
+                    responseAnswer,
+                    surveyResponse,
+                )
+                setUpUI()
+            } else if ((questionList?.size ?: 0) - 1 > questionId) {
+                questionId++
+                writeSurveyResponse(
+                    responseAnswer,
+                    surveyResponse,
+                )
+                setUpUI()
             }
-            setNextQuestion(surveyResponse!!,responseAnswer)
-            if (responseAnswer != null && responseAnswer.isNotEmpty()) {
+        }
+    }
 
+    private fun writeSurveyResponse(
+        responseAnswer: String?,
+        surveyResponse: UserQuestionResponse,
+    ) {
+        val questionTypeId = surveyResponse.document?.fields?.questionTypeId?.integerValue
+            ?: "9"
+        if (questionTypeId != "6" && questionTypeId != "9") {
+            if (responseAnswer != null && responseAnswer.isNotEmpty()) {
+                val tempQuestionList =
+                    questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
                 val surveyId = surveyResponse.document?.fields?.surveyId?.stringValue
-                val date: String = getCurrentDate()
+                val date: String = BabbleSdkHelper.getCurrentDate()
                 val requestData = AddResponseRequest(
                     surveyId = surveyId,
                     questionTypeId = Integer.parseInt(questionTypeId),
@@ -203,7 +280,9 @@ class SurveyActivity : AppCompatActivity() {
                     responseUpdatedAt = date,
                     shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse.document?.name,
                     shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse.document?.name,
-                    response = responseAnswer
+                    response = responseAnswer,
+                    nextQuestionTracker = (questionList!![questionId].document?.fields?.questionTypeId?.integerValue
+                        ?: "") != "9"
                 )
                 val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
                     BabbleApiInterface::class.java
@@ -221,36 +300,6 @@ class SurveyActivity : AppCompatActivity() {
                             Log.e(TAG, "onFailure: $t")
                         }
                     })
-            }
-        } else {
-            setNextQuestion(surveyResponse!!, "")
-        }
-    }
-
-    private fun setNextQuestion(surveyResponse: UserQuestionResponse, responseAnswer: String?) {
-        if (questionId == (questionList?.size ?: 0) - 1) {
-            finish()
-        } else {
-            if (surveyResponse.document?.fields?.nextQuestion != null&&surveyResponse.document?.fields?.nextQuestion?.get("mapValue")?.get("fields")?.get(responseAnswer) != null) {
-
-            if((surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"])!!.lowercase() == "end"){
-                finish()
-            }else {
-                for (i in questionId until (questionList!!.size)) {
-                    if (BabbleSdkHelper.getIdFromStringPath(questionList!![i].document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![responseAnswer]!!["stringValue"]) {
-                        questionId = i
-                        setUpUI()
-                        break
-                    } else if (i == (questionList!!.size - 1)) {
-                        questionId++
-                        setUpUI()
-                        break
-                    }
-                }
-            }
-            } else if ((questionList?.size ?: 0) - 1 > questionId) {
-                questionId++
-                setUpUI()
             }
         }
     }
