@@ -201,7 +201,9 @@ class SurveyActivity : AppCompatActivity() {
         checkForNextQuestion: String?,
         responseAnswer: String?,
     ) {
+        var hasNextQuestion=true
         if (questionId == (questionList?.size ?: 0) - 1) {
+            hasNextQuestion=false
             finish()
         } else {
             if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
@@ -217,6 +219,7 @@ class SurveyActivity : AppCompatActivity() {
                         ?.get("any")?.get("stringValue")
                         ?: "").lowercase() == "end"
                 ) {
+                    hasNextQuestion=false
                     finish()
                 } else {
                     val index =
@@ -243,67 +246,64 @@ class SurveyActivity : AppCompatActivity() {
                         questionId++
                     }
                 }
-                writeSurveyResponse(
-                    responseAnswer,
-                    surveyResponse,
-                )
                 setUpUI()
             } else if ((questionList?.size ?: 0) - 1 > questionId) {
                 questionId++
-                writeSurveyResponse(
-                    responseAnswer,
-                    surveyResponse,
-                )
                 setUpUI()
             }
         }
+        writeSurveyResponse(
+            responseAnswer,
+            surveyResponse,
+            hasNextQuestion
+        )
     }
 
     private fun writeSurveyResponse(
         responseAnswer: String?,
         surveyResponse: UserQuestionResponse,
+        hasNextQuestion: Boolean
     ) {
         val questionTypeId = surveyResponse.document?.fields?.questionTypeId?.integerValue
             ?: "9"
         if (questionTypeId != "6" && questionTypeId != "9") {
-            if (responseAnswer != null && responseAnswer.isNotEmpty()) {
-                val tempQuestionList =
-                    questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
-                val surveyId = surveyResponse.document?.fields?.surveyId?.stringValue
-                val date: String = BabbleSdkHelper.getCurrentDate()
-                val requestData = AddResponseRequest(
-                    surveyId = surveyId,
-                    questionTypeId = Integer.parseInt(questionTypeId),
-                    sequenceNo = Integer.parseInt((surveyResponse.document?.fields?.sequenceNo?.integerValue
-                        ?: "-1").toString()),
-                    surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
-                    questionText = surveyResponse.document?.fields?.questionText?.stringValue
-                        ?: "",
-                    responseCreatedAt = date,
-                    responseUpdatedAt = date,
-                    shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse.document?.name,
-                    shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse.document?.name,
-                    response = responseAnswer,
-                    nextQuestionTracker = (questionList!![questionId].document?.fields?.questionTypeId?.integerValue
-                        ?: "") != "9"
-                )
-                val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
-                    BabbleApiInterface::class.java
-                )
-                babbleApi.addResponse(BabbleSDKController.getInstance(this)?.userId, requestData)
-                    .enqueue(object : Callback<ResponseBody> {
-                        override fun onResponse(
-                            call: Call<ResponseBody>,
-                            response: retrofit2.Response<ResponseBody>,
-                        ) {
-                            Log.e(TAG, "Survey response saved.")
-                        }
+            val tempQuestionList =
+                questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
+            val surveyId = surveyResponse.document?.fields?.surveyId?.stringValue
+            val date: String = BabbleSdkHelper.getCurrentDate()
+            val requestData = AddResponseRequest(
+                surveyId = surveyId,
+                questionTypeId = Integer.parseInt(questionTypeId),
+                sequenceNo = Integer.parseInt((surveyResponse.document?.fields?.sequenceNo?.integerValue
+                    ?: "-1").toString()),
+                surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
+                questionText = surveyResponse.document?.fields?.questionText?.stringValue
+                    ?: "",
+                responseCreatedAt = date,
+                responseUpdatedAt = date,
+                shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse.document?.name,
+                shouldMarkPartial = tempQuestionList?.last()?.document?.name != surveyResponse.document?.name,
+                response = responseAnswer ?: "",
+                nextQuestionTracker = ((questionList!![questionId].document?.fields?.questionTypeId?.integerValue
+                    ?: "") != "9")&&hasNextQuestion
+            )
+            Log.e(TAG, "writeSurveyResponse: $requestData" )
+            val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
+                BabbleApiInterface::class.java
+            )
+            babbleApi.addResponse(BabbleSDKController.getInstance(this)?.userId, requestData)
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: retrofit2.Response<ResponseBody>,
+                    ) {
+                        Log.e(TAG, "Survey response saved.")
+                    }
 
-                        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                            Log.e(TAG, "onFailure: $t")
-                        }
-                    })
-            }
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e(TAG, "onFailure: $t")
+                    }
+                })
         }
     }
 
