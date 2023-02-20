@@ -212,6 +212,9 @@ class SurveyActivity : AppCompatActivity() {
                 if ((surveyResponse.document?.fields?.nextQuestion?.get(
                         "mapValue")?.get("fields")
                         ?.get(checkForNextQuestion)?.get("stringValue")
+                        ?: "").lowercase() == "end" || (surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue")?.get("fields")
+                        ?.get("any")?.get("stringValue")
                         ?: "").lowercase() == "end"
                 ) {
                     finish()
