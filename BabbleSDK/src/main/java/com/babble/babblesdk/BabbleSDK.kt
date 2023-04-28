@@ -34,6 +34,15 @@ class BabbleSDK(activity: Context) {
             }
         }
 
+        fun cancelSurvey() {
+            if (this::instance.isInitialized) {
+                BabbleSDKController.getInstance(instance.activity!!)
+                    ?.cancelSurvey()
+            } else {
+                BabbleSdkHelper.notInitialized()
+            }
+        }
+
         fun setCustomerId(customerId: String?, userDetails: HashMap<String, Any?>? = null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)

@@ -62,4 +62,7 @@ internal interface BabbleApiInterface {
     fun setCustomerProperties(
         @Body request: CustomerPropertiesRequest
     ): Call<ResponseBody>
+
+    @POST("survey_close")
+    fun surveyClose(): Call<ResponseBody>
 }

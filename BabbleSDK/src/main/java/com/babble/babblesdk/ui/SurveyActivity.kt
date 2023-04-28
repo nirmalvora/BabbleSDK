@@ -32,6 +32,7 @@ import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Response
 import java.util.*
 
 
@@ -133,6 +134,20 @@ class SurveyActivity : AppCompatActivity() {
 
     override fun finish() {
         overridePendingTransition(R.anim.nothing, R.anim.slide_down_new_theme)
+        val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
+            BabbleApiInterface::class.java
+        )
+        babbleApi.surveyClose().enqueue(object: Callback<ResponseBody>{
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Log.e(TAG, "onResponse: "+response.code() )
+
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e(TAG, "onFailure: "+t.message )
+            }
+
+        })
         super.finish()
     }
 

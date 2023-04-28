@@ -12,7 +12,8 @@ import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 internal object BabbleSdkHelper {
     fun initializationFailed() {
@@ -37,6 +38,10 @@ internal object BabbleSdkHelper {
 
     fun notEligibleSurvey() {
         Log.e(TAG, "Given survey id is not eligible")
+    }
+
+    fun samplingFail() {
+        Log.e(TAG, "Sampling fail")
     }
 
     fun getCurrentDate(): String {
@@ -123,4 +128,6 @@ internal object BabbleSdkHelper {
             Log.e(TAG, "Button color fail" )
         }
     }
+
+
 }

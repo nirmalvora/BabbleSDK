@@ -28,6 +28,8 @@ data class UserSurveyFields(
     @SerializedName("user_id") var userId: UserSurveyString? = UserSurveyString(),
     @SerializedName("title") var title: UserSurveyString? = UserSurveyString(),
     @SerializedName("status") var status: UserSurveyString? = UserSurveyString(),
+    @SerializedName("trigger_delay") var triggerDelay: UserSurveyInteger? = UserSurveyInteger(),
+    @SerializedName("sampling_percentage") var samplingPercentage: UserSurveyInteger? = UserSurveyInteger(),
     @SerializedName("max_responses") var maxResponses: UserSurveyString? = UserSurveyString(),
     @SerializedName("updated_at") var updatedAt: UserSurveyString? = UserSurveyString(),
     @SerializedName("end_date") var endDate: UserSurveyString? = UserSurveyString(),
@@ -40,5 +42,11 @@ data class UserSurveyFields(
 data class UserSurveyString(
 
     @SerializedName("stringValue") var stringValue: String? = null
+
+) : Serializable
+
+data class UserSurveyInteger(
+
+    @SerializedName("integerValue") var integerValue: String? = null
 
 ) : Serializable
