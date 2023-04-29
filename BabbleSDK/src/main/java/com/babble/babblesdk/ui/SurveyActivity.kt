@@ -20,6 +20,7 @@ import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
 import com.babble.babblesdk.databinding.ActivitySurveyBinding
 import com.babble.babblesdk.model.AddResponseRequest
+import com.babble.babblesdk.model.SurveyCloseRequest
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.repository.ApiClient
 import com.babble.babblesdk.repository.BabbleApiInterface
@@ -133,14 +134,15 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     override fun finish() {
+
         overridePendingTransition(R.anim.nothing, R.anim.slide_down_new_theme)
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
-        babbleApi.surveyClose().enqueue(object: Callback<ResponseBody>{
+        babbleApi.surveyClose(SurveyCloseRequest(surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId)).enqueue(object: Callback<ResponseBody>{
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 Log.e(TAG, "onResponse: "+response.code() )
-
+                BabbleSDKController.getInstance(applicationContext)!!.getBEAndES()
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {

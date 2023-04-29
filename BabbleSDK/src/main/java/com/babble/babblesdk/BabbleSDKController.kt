@@ -152,7 +152,7 @@ internal class BabbleSDKController(context: Context) {
         }
     }
 
-    private fun getBEAndES() {
+     fun getBEAndES() {
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
@@ -271,7 +271,6 @@ internal class BabbleSDKController(context: Context) {
                                     BabbleConstants.surveyDetail, Gson().toJson(questionList)
                                 )
                                 surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                getBEAndES()
                                 timer = Timer()
                                 timer.schedule(
                                     timerTask {
@@ -284,7 +283,6 @@ internal class BabbleSDKController(context: Context) {
                                 return@breaking
                             }else{
                                 BabbleSdkHelper.samplingFail()
-                                return@breaking
                             }
                         } else {
                             if (!cohortCheck && cohortIds?.contains(

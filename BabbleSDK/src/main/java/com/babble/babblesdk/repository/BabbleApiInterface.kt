@@ -4,6 +4,7 @@ import com.babble.babblesdk.model.AddResponseRequest
 import com.babble.babblesdk.model.CustomerPropertiesRequest
 import com.babble.babblesdk.model.EligibleSurveyRequest
 import com.babble.babblesdk.model.EligibleSurveyResponse.EligibleSurveyResponse
+import com.babble.babblesdk.model.SurveyCloseRequest
 import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.backendEventResponse.BackedEventResponse
 import com.babble.babblesdk.model.cohortResponse.CohortResponse
@@ -64,5 +65,5 @@ internal interface BabbleApiInterface {
     ): Call<ResponseBody>
 
     @POST("survey_close")
-    fun surveyClose(): Call<ResponseBody>
+    fun surveyClose(@Body request: SurveyCloseRequest): Call<ResponseBody>
 }
