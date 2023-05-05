@@ -1,6 +1,7 @@
 package com.babble.babblesdk.model.surveyForUsers
 
 
+import com.babble.babblesdk.model.questionsForUser.UserQuestionBoolean
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -35,7 +36,8 @@ data class UserSurveyFields(
     @SerializedName("end_date") var endDate: UserSurveyString? = UserSurveyString(),
     @SerializedName("event_name") var eventName: UserSurveyString? = UserSurveyString(),
     @SerializedName("relevance_period") var relevancePeriod: UserSurveyString? = UserSurveyString(),
-    @SerializedName("cohort_id") var cohortId: UserSurveyString? = UserSurveyString()
+    @SerializedName("cohort_id") var cohortId: UserSurveyString? = UserSurveyString(),
+    @SerializedName("is_quiz") var isQuiz: UserQuestionBoolean? = UserQuestionBoolean()
 
 ) : Serializable
 

@@ -14,6 +14,8 @@ import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
 import com.babble.babblesdk.utils.BabbleSdkHelper
+import java.util.Timer
+import kotlin.concurrent.timerTask
 
 
 internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
@@ -51,15 +53,19 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                     binding.btnLayout.nextButton.visibility = View.VISIBLE
                     LinearLayoutManager(activity)
                 }
+
                 "2" -> {
                     LinearLayoutManager(activity)
                 }
+
                 "4" -> {
                     GridLayoutManager(activity, 10)
                 }
+
                 "5", "7", "8" -> {
                     GridLayoutManager(activity, 5)
                 }
+
                 else -> {
                     LinearLayoutManager(activity)
                 }
@@ -72,7 +78,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
         binding.surveyOptionsList.adapter = dashboardAdapter
 
-        BabbleSdkHelper.submitButtonBeautification(requireActivity(),binding.btnLayout.nextButton)
+        BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
         return binding.root
     }
 
@@ -109,14 +115,34 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                     )
                 }
             }
+
             "2" -> {
+
                 questionData.selectedOptions = arrayListOf()
                 questionData.selectedOptions.add(
                     questionData.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
                         ?: ""
                 )
-                surveyActivity!!.addUserResponse(questionData)
+
+                if ((questionData.document?.fields?.correctAnswer?.stringValue
+                        ?: "").isNotEmpty()
+                ) {
+                    val timer = Timer()
+                    timer.schedule(
+                        timerTask {
+                            requireActivity().runOnUiThread {
+                                surveyActivity!!.addUserResponse(
+                                    questionData
+                                )
+                            }
+                        },
+                        500
+                    )
+                } else {
+                    surveyActivity!!.addUserResponse(questionData)
+                }
             }
+
             "4", "5", "7", "8" -> {
                 if (questionData.selectedRating == (position + 1)) {
                     questionData.selectedRating = null
@@ -137,6 +163,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                 binding.btnLayout.nextButton.isEnabled = isEnabled
                 binding.btnLayout.nextButton.isClickable = isEnabled
             }
+
             "4", "5", "7", "8" -> {
                 binding.btnLayout.nextButton.isEnabled = questionData.selectedRating != null
                 binding.btnLayout.nextButton.isClickable = questionData.selectedRating != null

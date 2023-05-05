@@ -38,6 +38,7 @@ data class UserQuestionFields(
     @SerializedName("max_val_description") var maxValDescription: UserQuestionString? = UserQuestionString(),
     @SerializedName("min_val_description") var minValDescription: UserQuestionString? = UserQuestionString(),
     @SerializedName("answers") var answers: Answers? = Answers(),
+    @SerializedName("correct_answer") var correctAnswer: UserQuestionString? = UserQuestionString(),
     @SerializedName("next_question") @Expose var nextQuestion: Map<String, Map<String, Map<String, Map<String, String>>>>? = HashMap(),
 
     ) : Serializable
@@ -50,7 +51,7 @@ data class UserQuestionString(
 
 data class UserQuestionBoolean(
 
-    @SerializedName("booleanValue") var stringValue: Boolean? = null,
+    @SerializedName("booleanValue") var booleanValue: Boolean? = null,
 
     ) : Serializable
 

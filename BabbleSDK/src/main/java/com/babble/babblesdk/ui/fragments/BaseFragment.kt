@@ -1,7 +1,6 @@
 package com.babble.babblesdk.ui.fragments
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse

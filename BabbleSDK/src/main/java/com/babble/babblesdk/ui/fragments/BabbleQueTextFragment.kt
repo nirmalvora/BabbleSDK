@@ -30,17 +30,6 @@ internal class BabbleQueTextFragment : BaseFragment() {
         binding.surveyTitle.visibility = getVisibility(questionText)
         binding.surveySubTitle.visibility = getVisibility(questionDesc)
         binding.btnLayout.nextButton.visibility = getVisibility(buttonText)
-//        binding.btnLayout.nextButton.isEnabled = false
-//        binding.btnLayout.nextButton.isClickable = false
-//        binding.childUserInput.addTextChangedListener { text ->
-//            if ((text ?: "").isEmpty()) {
-//                binding.btnLayout.nextButton.isEnabled = false
-//                binding.btnLayout.nextButton.isClickable = false
-//            } else {
-//                binding.btnLayout.nextButton.isEnabled = true
-//                binding.btnLayout.nextButton.isClickable = true
-//            }
-//        }
         BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
         return binding.root
     }

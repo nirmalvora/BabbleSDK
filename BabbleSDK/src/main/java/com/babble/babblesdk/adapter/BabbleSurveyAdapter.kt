@@ -77,18 +77,22 @@ internal class BabbleSurveyAdapter(
                 view = mInflater.inflate(R.layout.mcq_radio_list_child, parent, false)
                 MCQRadioViewHolder(view)
             }
+
             1 -> {
                 view = mInflater.inflate(R.layout.ratings_list_child, parent, false)
                 RatingsViewHolder(view)
             }
+
             2 -> {
                 view = mInflater.inflate(R.layout.ratings_star_list_child, parent, false)
                 RatingsStarViewHolder(view)
             }
+
             3 -> {
                 view = mInflater.inflate(R.layout.ratings_emoji_child, parent, false)
                 RatingsEmojiViewHolder(view)
             }
+
             else -> {
                 view = mInflater.inflate(R.layout.mcq_radio_list_child, parent, false)
                 MCQRadioViewHolder(view)
@@ -102,39 +106,98 @@ internal class BabbleSurveyAdapter(
             0 -> {
                 val mcqHolder: MCQRadioViewHolder = holder as MCQRadioViewHolder
                 mcqHolder.title.text =
-                    this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
+                    this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
+                        ?: ""
                 (mcqHolder.title.parent as RelativeLayout).background =
                     ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
                 val gd =
                     (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
-                if (this.surveyFields?.selectedOptions?.contains(this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue?:""
-                    ) == true
+                if ((surveyFields?.document?.fields?.correctAnswer?.stringValue
+                        ?: "").isNotEmpty()
                 ) {
-                    try {
-                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                    } catch (nfe: NumberFormatException) {
-                        BabbleSDKController.getInstance(mContext)!!.themeColor =
-                            "#" + Integer.toHexString(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
-                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                    }
-                    mcqHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext, R.color.white)
-                    )
-                } else {
-                    gd.setColor(
-                        ContextCompat.getColor(
-                            mContext,
-                            R.color.new_theme_gray
+                    val correctAnswer = surveyFields?.document?.fields?.correctAnswer?.stringValue
+                        ?: ""
+                    val selectedAnswer =
+                        this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(
+                            position
+                        )?.stringValue ?: ""
+
+                    if ((this.surveyFields?.selectedOptions ?: arrayListOf()).isNotEmpty()) {
+                        if (correctAnswer == (this.surveyFields?.selectedOptions
+                                ?: arrayListOf())[0] && correctAnswer == selectedAnswer || correctAnswer == selectedAnswer
+                        ) {
+                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.greenColor))
+                            mcqHolder.title.setTextColor(
+                                ContextCompat.getColor(mContext, R.color.txtblack)
+                            )
+                        } else if ((this.surveyFields?.selectedOptions
+                                ?: arrayListOf())[0] == selectedAnswer
+                        ) {
+                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.redColor))
+                            mcqHolder.title.setTextColor(
+                                ContextCompat.getColor(mContext, R.color.white)
+                            )
+                        } else {
+                            gd.setColor(
+                                ContextCompat.getColor(
+                                    mContext,
+                                    R.color.new_theme_gray
+                                )
+                            ) //R.color.new_theme_gray));
+                            mcqHolder.title.setTextColor(
+                                ContextCompat.getColor(mContext, R.color.txtblack)
+                            )
+                        }
+                    } else {
+                        gd.setColor(
+                            ContextCompat.getColor(
+                                mContext,
+                                R.color.new_theme_gray
+                            )
+                        ) //R.color.new_theme_gray));
+                        mcqHolder.title.setTextColor(
+                            ContextCompat.getColor(mContext, R.color.txtblack)
                         )
-                    ) //R.color.new_theme_gray));
-                    mcqHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext, R.color.txtblack)
-                    )
+                    }
+                } else {
+                    if (this.surveyFields?.selectedOptions?.contains(
+                            this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(
+                                position
+                            )?.stringValue ?: ""
+                        ) == true
+                    ) {
+                        try {
+                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                        } catch (nfe: NumberFormatException) {
+                            BabbleSDKController.getInstance(mContext)!!.themeColor =
+                                "#" + Integer.toHexString(
+                                    ContextCompat.getColor(
+                                        mContext,
+                                        R.color.colorPrimaryDark
+                                    )
+                                )
+                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                        }
+                        mcqHolder.title.setTextColor(
+                            ContextCompat.getColor(mContext, R.color.white)
+                        )
+                    } else {
+                        gd.setColor(
+                            ContextCompat.getColor(
+                                mContext,
+                                R.color.new_theme_gray
+                            )
+                        ) //R.color.new_theme_gray));
+                        mcqHolder.title.setTextColor(
+                            ContextCompat.getColor(mContext, R.color.txtblack)
+                        )
+                    }
                 }
                 (mcqHolder.title.parent as RelativeLayout).setOnClickListener {
                     babbleClickHandler.itemClicked(position)
                 }
             }
+
             1 -> {
                 val ratingHolder: RatingsViewHolder = holder as RatingsViewHolder
                 ratingHolder.title.text = "${position + 1}"
@@ -147,7 +210,12 @@ internal class BabbleSurveyAdapter(
                         gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
                     } catch (nfe: NumberFormatException) {
                         BabbleSDKController.getInstance(mContext)!!.themeColor =
-                            "#" + Integer.toHexString(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
+                            "#" + Integer.toHexString(
+                                ContextCompat.getColor(
+                                    mContext,
+                                    R.color.colorPrimaryDark
+                                )
+                            )
                         gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
                     }
                     ratingHolder.title.setTextColor(
@@ -168,6 +236,7 @@ internal class BabbleSurveyAdapter(
                     babbleClickHandler.itemClicked(position)
                 }
             }
+
             2 -> {
                 val ratingStarViewHolder: RatingsStarViewHolder = holder as RatingsStarViewHolder
                 if ((position + 1) <= (this.surveyFields?.selectedRating ?: -1)) {
@@ -183,6 +252,7 @@ internal class BabbleSurveyAdapter(
                     babbleClickHandler.itemClicked(position)
                 }
             }
+
             3 -> {
                 val ratingsEmojiViewHolder: RatingsEmojiViewHolder =
                     holder as RatingsEmojiViewHolder
@@ -197,7 +267,12 @@ internal class BabbleSurveyAdapter(
                 if (this.surveyFields?.selectedRating == (position + 1)) {
                     gdEmojis.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
                 } else {
-                    gdEmojis.setColor(BabbleSdkHelper.manipulateColor(Color.parseColor("#000000"), 0.0f))
+                    gdEmojis.setColor(
+                        BabbleSdkHelper.manipulateColor(
+                            Color.parseColor("#000000"),
+                            0.0f
+                        )
+                    )
                 }
 
                 (ratingsEmojiViewHolder.emoji.parent as RelativeLayout).setOnClickListener {
@@ -219,24 +294,30 @@ internal class BabbleSurveyAdapter(
         when (this.surveyFields?.document?.fields?.questionTypeId?.integerValue ?: "9") {
             "1", "2" -> {
                 viewType = 0
-                listSize = this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.size?:0
+                listSize =
+                    this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.size ?: 0
             }
+
             "4" -> {
                 viewType = 1
                 listSize = 10
             }
+
             "5" -> {
                 viewType = 1
                 listSize = 5
             }
+
             "7" -> {
                 viewType = 2
                 listSize = 5
             }
+
             "8" -> {
                 viewType = 3
                 listSize = 5
             }
+
             else -> {
                 viewType = -1
                 listSize = 0

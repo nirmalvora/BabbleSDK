@@ -39,6 +39,8 @@ internal class BabbleSDKController(context: Context) {
     var userId: String? = null
     private var timer = Timer()
     var themeColor: String = "#5D5FEF"
+    var greenColor: String = "#ccffcc"
+    var redColor: String = "#FF0000"
     var surveyInstanceId: String? = null
     var cohortIds: List<String>? = null
     var backendEvents: List<BackedEventResponse>? = null
@@ -260,20 +262,24 @@ internal class BabbleSDKController(context: Context) {
                             Log.e(TAG, "trigger: $randomSample  $samplingValue" )
                             if( randomSample < samplingValue) {
 
-                                createSurveyInstance(
-                                    surveyId = surveyId,
-                                    eventList = eventList,
-                                    properties = properties
-                                )
-                                val surveyIntent =
-                                    Intent(mContext!!.applicationContext, SurveyActivity::class.java)
-                                surveyIntent.putExtra(
-                                    BabbleConstants.surveyDetail, Gson().toJson(questionList)
-                                )
-                                surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
                                 timer = Timer()
                                 timer.schedule(
                                     timerTask {
+                                        createSurveyInstance(
+                                            surveyId = surveyId,
+                                            eventList = eventList,
+                                            properties = properties
+                                        )
+                                        val surveyIntent =
+                                            Intent(mContext!!.applicationContext, SurveyActivity::class.java)
+                                        surveyIntent.putExtra(
+                                            BabbleConstants.surveyDetail, Gson().toJson(questionList)
+                                        )
+                                        surveyIntent.putExtra(
+                                            BabbleConstants.survey, Gson().toJson(survey)
+                                        )
+                                        surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         mContext?.applicationContext?.startActivity(surveyIntent)
                                     },
                                     (Integer.parseInt(

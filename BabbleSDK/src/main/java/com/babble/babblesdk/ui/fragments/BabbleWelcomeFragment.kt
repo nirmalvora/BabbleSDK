@@ -7,14 +7,16 @@ import android.view.ViewGroup
 import android.widget.RelativeLayout
 import com.babble.babblesdk.databinding.FragmentBabbleWelcomeBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
+import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleSdkHelper
-import java.util.*
+import java.util.Timer
 import kotlin.concurrent.timerTask
 
 
 internal class BabbleWelcomeFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleWelcomeBinding
+    lateinit var surveyData: UserSurveyResponse
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -22,9 +24,12 @@ internal class BabbleWelcomeFragment : BaseFragment() {
         binding = FragmentBabbleWelcomeBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    val timer = Timer()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        surveyData =
+            requireArguments().getSerializable(BabbleConstants.survey) as UserSurveyResponse
+
         val field = questionData.document?.fields
         val questionText = field?.questionText?.stringValue ?: ""
         val questionDesc = field?.questionDesc?.stringValue ?: ""
@@ -46,13 +51,45 @@ internal class BabbleWelcomeFragment : BaseFragment() {
             val titleLayoutParams = binding.surveyTitle.layoutParams as RelativeLayout.LayoutParams
             titleLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
             binding.surveyTitle.layoutParams = titleLayoutParams
+            var delayTime: Long = 1000
+            if (surveyData.document?.fields?.isQuiz?.booleanValue == true) {
+                delayTime = 3000
+                val totalQuestion =
+                    requireArguments().getSerializable(BabbleConstants.totalQuestion) as Int?
+                val correctAnswers =
+                    requireArguments().getSerializable(BabbleConstants.correctAnswers) as Int?
+                val quizResultText = if(totalQuestion == 1){
+                    if(correctAnswers == 1){
+                        "Correct answer ✅"
+                    }else{
+                        "Incorrect answer ❌"
+                    }
+                }else{
+                    buildString {
+                        append("All Done 😀 ")
+                        append(correctAnswers)
+                        append(" of ")
+                        append(totalQuestion!!)
+                        append(" correct ✅")
+                    }
+                }
+                binding.quizResult.text = quizResultText
+                binding.quizResult.visibility = View.VISIBLE
+            }
 
-            val timer = Timer()
             timer.schedule(timerTask {
-                requireActivity().finish()
-            }, 1000)
+                if(surveyActivity != null) {
+                    requireActivity().finish()
+                }
+            }, delayTime)
         }
+
         BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
+    }
+
+    override fun onDetach() {
+        timer.cancel()
+        super.onDetach()
     }
 
     private fun getVisibility(text: String): Int {
@@ -61,10 +98,27 @@ internal class BabbleWelcomeFragment : BaseFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: UserQuestionResponse) =
+        fun newInstance(
+            param1: UserQuestionResponse,
+            surveyData: UserSurveyResponse?,
+            totalQuestion: Int?,
+            totalCorrectAnswer: Int?
+        ) =
             BabbleWelcomeFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable(BabbleConstants.questionData, param1)
+                    putSerializable(BabbleConstants.survey, surveyData)
+                    putSerializable(BabbleConstants.totalQuestion, totalQuestion)
+                    putSerializable(BabbleConstants.correctAnswers, totalCorrectAnswer)
+                }
+            }
+
+        @JvmStatic
+        fun newInstance(param1: UserQuestionResponse, surveyData: UserSurveyResponse?) =
+            BabbleWelcomeFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable(BabbleConstants.questionData, param1)
+                    putSerializable(BabbleConstants.survey, surveyData)
                 }
             }
     }

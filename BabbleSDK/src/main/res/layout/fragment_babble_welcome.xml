@@ -35,13 +35,25 @@
             android:text="@string/hello_blank_fragment"
             android:visibility="gone"
             android:textColor="@color/txtblack" />
+        <TextView
+            android:layout_below="@+id/survey_sub_title"
+            android:id="@+id/quiz_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/field_padding"
+            android:layout_marginTop="@dimen/field_padding"
+            android:layout_marginEnd="@dimen/field_padding"
+            android:layout_marginBottom="@dimen/field_padding"
+            android:text="@string/hello_blank_fragment"
+            android:visibility="gone"
+            android:textColor="@color/txtblack" />
 
         <include
             android:id="@+id/btn_layout"
             layout="@layout/buttons_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/survey_sub_title" />
+            android:layout_below="@id/quiz_result" />
     </RelativeLayout>
 
 
