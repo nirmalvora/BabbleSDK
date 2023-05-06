@@ -128,7 +128,7 @@ internal class BabbleSurveyAdapter(
                         ) {
                             gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.greenColor))
                             mcqHolder.title.setTextColor(
-                                ContextCompat.getColor(mContext, R.color.txtblack)
+                                ContextCompat.getColor(mContext, R.color.white)
                             )
                         } else if ((this.surveyFields?.selectedOptions
                                 ?: arrayListOf())[0] == selectedAnswer

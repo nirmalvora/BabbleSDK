@@ -39,7 +39,7 @@ internal class BabbleSDKController(context: Context) {
     var userId: String? = null
     private var timer = Timer()
     var themeColor: String = "#5D5FEF"
-    var greenColor: String = "#ccffcc"
+    var greenColor: String = "#3eaa1c"
     var redColor: String = "#FF0000"
     var surveyInstanceId: String? = null
     var cohortIds: List<String>? = null
