@@ -45,6 +45,7 @@
             android:layout_marginEnd="@dimen/field_padding"
             android:layout_marginBottom="@dimen/field_padding"
             android:text="@string/hello_blank_fragment"
+            android:layout_centerHorizontal="true"
             android:visibility="gone"
             android:textColor="@color/txtblack" />
 
