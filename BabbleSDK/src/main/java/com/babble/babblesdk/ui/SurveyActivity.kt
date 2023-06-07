@@ -2,6 +2,7 @@ package com.babble.babblesdk.ui
 
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -33,6 +34,7 @@ import com.babble.babblesdk.ui.fragments.BabbleQueTextFragment
 import com.babble.babblesdk.ui.fragments.BabbleWelcomeFragment
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleSdkHelper
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -43,7 +45,7 @@ import java.util.*
 
 class SurveyActivity : AppCompatActivity() {
     private var userQuestionList: List<UserQuestionResponse>? = null
-    private var surveyData:UserSurveyResponse? = null
+    private var surveyData: UserSurveyResponse? = null
     private lateinit var binding: ActivitySurveyBinding
     private var questionId: Int = 0
     private var questionList: List<UserQuestionResponse>? = null
@@ -67,8 +69,7 @@ class SurveyActivity : AppCompatActivity() {
             Gson().fromJson(surveyDetail, Array<UserQuestionResponse>::class.java).asList()
 
 
-        surveyData =
-            Gson().fromJson(surveyDataJson!!, UserSurveyResponse::class.java)
+        surveyData = Gson().fromJson(surveyDataJson!!, UserSurveyResponse::class.java)
 
         questionList = userQuestionList?.sortedBy {
             it.document?.fields?.sequenceNo?.integerValue?.let { it1 ->
@@ -78,7 +79,7 @@ class SurveyActivity : AppCompatActivity() {
             }
         }
 
-        if(surveyData?.document?.fields?.isQuiz?.booleanValue == true) {
+        if (surveyData?.document?.fields?.isQuiz?.booleanValue == true) {
             totalQuizQuestion = 0
             selectedAnswers = arrayListOf()
             questionList?.forEach {
@@ -86,8 +87,14 @@ class SurveyActivity : AppCompatActivity() {
                     totalQuizQuestion = totalQuizQuestion!! + 1
                 }
             }
-            if(questionList?.last()?.document?.fields?.questionTypeId?.integerValue !="9"){
-                questionList = questionList?.plus(UserQuestionResponse(document = UserQuestionDocument(fields = UserQuestionFields(questionTypeId = UserQuestionInteger("9")))))
+            if (questionList?.last()?.document?.fields?.questionTypeId?.integerValue != "9") {
+                questionList = questionList?.plus(
+                    UserQuestionResponse(
+                        document = UserQuestionDocument(
+                            fields = UserQuestionFields(questionTypeId = UserQuestionInteger("9"))
+                        )
+                    )
+                )
             }
         }
 
@@ -146,10 +153,7 @@ class SurveyActivity : AppCompatActivity() {
     private fun setProgressAnimate() {
 
         val animation: ObjectAnimator = ObjectAnimator.ofInt(
-            binding.pageProgressBar,
-            "progress",
-            questionId * 100,
-            (questionId + 1) * 100
+            binding.pageProgressBar, "progress", questionId * 100, (questionId + 1) * 100
         )
         animation.duration = 500
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -192,16 +196,19 @@ class SurveyActivity : AppCompatActivity() {
                 ?: "9") {
                 "6", "9" -> {
                     var correctAnswerCount: Int? = null
-                    if(surveyData?.document?.fields?.isQuiz?.booleanValue == true) {
+                    if (surveyData?.document?.fields?.isQuiz?.booleanValue == true) {
                         correctAnswerCount = 0
                         selectedAnswers?.forEach { it ->
-                            val responseAnswer =
-                                it.selectedOptions.joinToString { it }
-                            if (it.document?.fields?.correctAnswer?.stringValue == responseAnswer)
-                                correctAnswerCount++
+                            val responseAnswer = it.selectedOptions.joinToString { it }
+                            if (it.document?.fields?.correctAnswer?.stringValue == responseAnswer) correctAnswerCount++
                         }
                     }
-                    BabbleWelcomeFragment.newInstance(questionList!![questionId],surveyData,totalQuizQuestion,correctAnswerCount)
+                    BabbleWelcomeFragment.newInstance(
+                        questionList!![questionId],
+                        surveyData,
+                        totalQuizQuestion,
+                        correctAnswerCount
+                    )
                 }
 
                 "1", "2", "4", "5", "7", "8" -> {
@@ -223,8 +230,7 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     fun addUserResponse(surveyResponse: UserQuestionResponse?) {
-        val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue
-            ?: "9"
+        val questionTypeId = surveyResponse?.document?.fields?.questionTypeId?.integerValue ?: "9"
         var responseAnswer: String? = ""
         var responseForNextQuestion: String? = ""
         when (questionTypeId) {
@@ -237,8 +243,7 @@ class SurveyActivity : AppCompatActivity() {
                         ?: arrayListOf()).sortedBy { orderById[it] }
                     responseForNextQuestion = sortedPeople[0]
                 }
-                responseAnswer =
-                    surveyResponse?.selectedOptions?.joinToString { it }
+                responseAnswer = surveyResponse?.selectedOptions?.joinToString { it }
             }
 
             "3" -> {
@@ -278,64 +283,112 @@ class SurveyActivity : AppCompatActivity() {
             ) {
                 if ((surveyResponse.document?.fields?.nextQuestion?.get(
                         "mapValue"
-                    )?.get("fields")
-                        ?.get(checkForNextQuestion)?.get("stringValue")
-                        ?: "").lowercase() == "end" || (surveyResponse.document?.fields?.nextQuestion?.get(
-                        "mapValue"
-                    )?.get("fields")
-                        ?.get("any")?.get("stringValue")
-                        ?: "").lowercase() == "end"
+                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                        ?: "").lowercase() == "in_app_survey"
                 ) {
+                    val manager = ReviewManagerFactory.create(this)
+                    val request = manager.requestReviewFlow()
+                    request.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // We got the ReviewInfo object
+                            val reviewInfo = task.result
+                            val flow = manager.launchReviewFlow(this, reviewInfo)
+                            flow.addOnCompleteListener { _ ->
+                                // The flow has finished. The API does not indicate whether the user
+                                // reviewed or not, or even whether the review dialog was shown. Thus, no
+                                // matter the result, we continue our app flow.
+                            }
+                        } else {
+                            // There was some problem, log or handle the error code.
+                            Log.e(TAG, "triggerSurvey: ${task.exception}")
+                        }
+                    }
+                    hasNextQuestion = false
+                    finish()
+                } else if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                        ?: "").lowercase() == "babble_whatsapp_referral"
+                ) {
+                    val indexOfSkipLogic =
+                        (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
+                            ?: arrayListOf()).indexOfFirst {
+                            (it.mapValue?.fields?.respVal?.stringValue
+                                ?: "") == checkForNextQuestion
+                        }
+                    var referralText = (surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")?.get(checkForNextQuestion)?.get("referral_text") ?: "")
+                    if (indexOfSkipLogic != -1) {
+                        referralText =
+                            (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
+                                ?: arrayListOf())[indexOfSkipLogic].mapValue?.fields?.referralText?.stringValue
+                                ?: ""
+                    }
+
+                    val sendIntent = Intent()
+                    sendIntent.action = Intent.ACTION_SEND
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, referralText)
+                    sendIntent.type = "text/plain"
+                    sendIntent.setPackage("com.whatsapp")
+                    startActivity(sendIntent)
                     hasNextQuestion = false
                     finish()
                 } else {
-                    val index =
-                        questionList!!.subList(questionId, (questionList ?: arrayListOf()).size)
-                            .indexOfFirst {
-                                if ((surveyResponse.document?.fields?.nextQuestion?.get(
-                                        "mapValue"
-                                    )?.get("fields")
-                                        ?.get(checkForNextQuestion)?.get("stringValue")
-                                        ?: "") != ""
-                                ) {
-                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![checkForNextQuestion]!!["stringValue"]
-                                } else if (surveyResponse.document?.fields?.nextQuestion?.get(
-                                        "mapValue"
-                                    )?.get("fields")?.get("any") != null
-                                ) {
-                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document?.fields?.nextQuestion?.get(
-                                        "mapValue"
-                                    )?.get("fields")?.get("any")?.get("stringValue")
-                                } else {
-                                    false
-                                }
-                            }
-                    if (index != -1) {
-                        questionId += index
+
+                    if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                            "mapValue"
+                        )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                            ?: "").lowercase() == "end" || (surveyResponse.document?.fields?.nextQuestion?.get(
+                            "mapValue"
+                        )?.get("fields")?.get("any")?.get("stringValue") ?: "").lowercase() == "end"
+                    ) {
+                        hasNextQuestion = false
+                        finish()
                     } else {
-                        questionId++
+                        val index =
+                            questionList!!.subList(questionId, (questionList ?: arrayListOf()).size)
+                                .indexOfFirst {
+                                    if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                                            "mapValue"
+                                        )?.get("fields")?.get(checkForNextQuestion)
+                                            ?.get("stringValue") ?: "") != ""
+                                    ) {
+                                        BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![checkForNextQuestion]!!["stringValue"]
+                                    } else if (surveyResponse.document?.fields?.nextQuestion?.get(
+                                            "mapValue"
+                                        )?.get("fields")?.get("any") != null
+                                    ) {
+                                        BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document?.fields?.nextQuestion?.get(
+                                            "mapValue"
+                                        )?.get("fields")?.get("any")?.get("stringValue")
+                                    } else {
+                                        false
+                                    }
+                                }
+                        if (index != -1) {
+                            questionId += index
+                        } else {
+                            questionId++
+                        }
                     }
+                    setUpUI()
                 }
-                setUpUI()
+
             } else if ((questionList?.size ?: 0) - 1 > questionId) {
                 questionId++
                 setUpUI()
             }
         }
         writeSurveyResponse(
-            responseAnswer,
-            surveyResponse,
-            hasNextQuestion
+            responseAnswer, surveyResponse, hasNextQuestion
         )
     }
 
     private fun writeSurveyResponse(
-        responseAnswer: String?,
-        surveyResponse: UserQuestionResponse,
-        hasNextQuestion: Boolean
+        responseAnswer: String?, surveyResponse: UserQuestionResponse, hasNextQuestion: Boolean
     ) {
-        val questionTypeId = surveyResponse.document?.fields?.questionTypeId?.integerValue
-            ?: "9"
+        val questionTypeId = surveyResponse.document?.fields?.questionTypeId?.integerValue ?: "9"
         if (questionTypeId != "6" && questionTypeId != "9") {
             val tempQuestionList =
                 questionList?.filter { it.document?.fields?.questionTypeId?.integerValue != "6" && it.document?.fields?.questionTypeId?.integerValue != "9" }
@@ -345,12 +398,10 @@ class SurveyActivity : AppCompatActivity() {
                 surveyId = surveyId,
                 questionTypeId = Integer.parseInt(questionTypeId),
                 sequenceNo = Integer.parseInt(
-                    (surveyResponse.document?.fields?.sequenceNo?.integerValue
-                        ?: "-1").toString()
+                    (surveyResponse.document?.fields?.sequenceNo?.integerValue ?: "-1").toString()
                 ),
                 surveyInstanceId = BabbleSDKController.getInstance(this)?.surveyInstanceId,
-                questionText = surveyResponse.document?.fields?.questionText?.stringValue
-                    ?: "",
+                questionText = surveyResponse.document?.fields?.questionText?.stringValue ?: "",
                 responseCreatedAt = date,
                 responseUpdatedAt = date,
                 shouldMarkComplete = tempQuestionList?.last()?.document?.name == surveyResponse.document?.name,

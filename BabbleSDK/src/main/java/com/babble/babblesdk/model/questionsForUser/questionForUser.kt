@@ -40,6 +40,7 @@ data class UserQuestionFields(
     @SerializedName("answers") var answers: Answers? = Answers(),
     @SerializedName("correct_answer") var correctAnswer: UserQuestionString? = UserQuestionString(),
     @SerializedName("next_question") @Expose var nextQuestion: Map<String, Map<String, Map<String, Map<String, String>>>>? = HashMap(),
+    @SerializedName("skip_logic_data" ) var skipLogicData : SkipLogicData? = SkipLogicData()
 
     ) : Serializable
 
@@ -84,3 +85,39 @@ data class ArrayValue(
     @SerializedName("values") var values: ArrayList<UserQuestionString> = arrayListOf(),
 
     ) : Serializable
+
+
+data class SkipLogicData (
+
+    @SerializedName("arrayValue" ) var arrayValue : SkipLogicArrayValue? = SkipLogicArrayValue()
+
+    ) : Serializable
+
+data class SkipLogicArrayValue (
+
+    @SerializedName("values" ) var values : ArrayList<SkipLogicValues> = arrayListOf()
+
+    ) : Serializable
+
+data class SkipLogicValues (
+
+    @SerializedName("mapValue" ) var mapValue : SkipLogicMapValue? = SkipLogicMapValue()
+
+    ) : Serializable
+
+data class SkipLogicMapValue (
+
+    @SerializedName("fields" ) var fields : Fields? = Fields()
+
+    ) : Serializable
+
+data class Fields (
+
+    @SerializedName("next_question" ) var nextQuestion : UserQuestionString? = UserQuestionString(),
+    @SerializedName("resp_val"      ) var respVal      : UserQuestionString?      = UserQuestionString(),
+    @SerializedName("referral_text" ) var referralText : UserQuestionString? = UserQuestionString()
+
+
+    ) : Serializable
+
+
