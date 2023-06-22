@@ -325,13 +325,16 @@ class SurveyActivity : AppCompatActivity() {
                                 ?: arrayListOf())[indexOfSkipLogic].mapValue?.fields?.referralText?.stringValue
                                 ?: ""
                     }
+                    try {
+                        val sendIntent = Intent()
+                        sendIntent.action = Intent.ACTION_SEND
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, referralText)
+                        sendIntent.type = "text/plain"
+                        sendIntent.setPackage("com.whatsapp")
+                        startActivity(sendIntent)
+                    } catch (_: Exception) {
 
-                    val sendIntent = Intent()
-                    sendIntent.action = Intent.ACTION_SEND
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, referralText)
-                    sendIntent.type = "text/plain"
-                    sendIntent.setPackage("com.whatsapp")
-                    startActivity(sendIntent)
+                    }
                     hasNextQuestion = false
                     finish()
                 } else {
