@@ -58,11 +58,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/survey_options_list"
                 android:layout_alignStart="@+id/survey_options_list"
-                android:layout_marginStart="0dp"
                 android:layout_marginTop="@dimen/field_padding"
                 android:text=""
                 android:textColor="@color/txtgray"
-                android:textSize="@dimen/page_sub_header_4" />
+                android:textSize="@dimen/page_sub_header_4"
+                android:layout_alignLeft="@+id/survey_options_list" />
 
             <TextView
                 android:id="@+id/ratings_full_like"
@@ -71,10 +71,10 @@
                 android:layout_below="@id/survey_options_list"
                 android:layout_alignEnd="@+id/survey_options_list"
                 android:layout_marginTop="@dimen/field_padding"
-                android:layout_marginEnd="0dp"
                 android:text=""
                 android:textColor="@color/txtgray"
-                android:textSize="@dimen/page_sub_header_4" />
+                android:textSize="@dimen/page_sub_header_4"
+                android:layout_alignRight="@+id/survey_options_list" />
 
         </RelativeLayout>
 

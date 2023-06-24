@@ -151,16 +151,18 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     private fun setProgressAnimate() {
-
-        val animation: ObjectAnimator = ObjectAnimator.ofInt(
-            binding.pageProgressBar, "progress", questionId * 100, (questionId + 1) * 100
-        )
-        animation.duration = 500
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            animation.setAutoCancel(true)
+        runOnUiThread {
+            val animation: ObjectAnimator = ObjectAnimator.ofInt(
+                binding.pageProgressBar, "progress", questionId * 100, (questionId + 1) * 100
+            )
+            animation.duration = 500
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                animation.setAutoCancel(true)
+            }
+            animation.interpolator = DecelerateInterpolator()
+            animation.start()
         }
-        animation.interpolator = DecelerateInterpolator()
-        animation.start()
+
     }
 
     override fun finish() {
@@ -271,7 +273,17 @@ class SurveyActivity : AppCompatActivity() {
     ) {
         var hasNextQuestion = true
         if (questionId == (questionList?.size ?: 0) - 1) {
-            hasNextQuestion = false
+            if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
+                    "mapValue"
+                )?.get("fields")
+                    ?.get(checkForNextQuestion) != null || surveyResponse.document?.fields?.nextQuestion?.get(
+                    "mapValue"
+                )?.get("fields")?.get("any") != null)
+            ) {
+                hasNextQuestion = checkSkipLogic(surveyResponse, checkForNextQuestion, true)
+            } else {
+                hasNextQuestion = false
+            }
             finish()
         } else {
             if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
@@ -281,111 +293,123 @@ class SurveyActivity : AppCompatActivity() {
                     "mapValue"
                 )?.get("fields")?.get("any") != null)
             ) {
-                if ((surveyResponse.document?.fields?.nextQuestion?.get(
-                        "mapValue"
-                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
-                        ?: "").lowercase() == "in_app_survey"
-                ) {
-                    val manager = ReviewManagerFactory.create(this)
-                    val request = manager.requestReviewFlow()
-                    request.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // We got the ReviewInfo object
-                            val reviewInfo = task.result
-                            val flow = manager.launchReviewFlow(this, reviewInfo)
-                            flow.addOnCompleteListener { _ ->
-                                // The flow has finished. The API does not indicate whether the user
-                                // reviewed or not, or even whether the review dialog was shown. Thus, no
-                                // matter the result, we continue our app flow.
-                            }
-                        } else {
-                            // There was some problem, log or handle the error code.
-                            Log.e(TAG, "triggerSurvey: ${task.exception}")
-                        }
-                    }
-                    hasNextQuestion = false
+                hasNextQuestion = checkSkipLogic(surveyResponse, checkForNextQuestion)
+                if (!hasNextQuestion) {
                     finish()
-                } else if ((surveyResponse.document?.fields?.nextQuestion?.get(
-                        "mapValue"
-                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
-                        ?: "").lowercase() == "babble_whatsapp_referral"
-                ) {
-                    val indexOfSkipLogic =
-                        (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
-                            ?: arrayListOf()).indexOfFirst {
-                            (it.mapValue?.fields?.respVal?.stringValue
-                                ?: "") == checkForNextQuestion
-                        }
-                    var referralText = (surveyResponse.document?.fields?.nextQuestion?.get(
-                        "mapValue"
-                    )?.get("fields")?.get(checkForNextQuestion)?.get("referral_text") ?: "")
-                    if (indexOfSkipLogic != -1) {
-                        referralText =
-                            (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
-                                ?: arrayListOf())[indexOfSkipLogic].mapValue?.fields?.referralText?.stringValue
-                                ?: ""
-                    }
-                    try {
-                        val sendIntent = Intent()
-                        sendIntent.action = Intent.ACTION_SEND
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, referralText)
-                        sendIntent.type = "text/plain"
-                        sendIntent.setPackage("com.whatsapp")
-                        startActivity(sendIntent)
-                    } catch (_: Exception) {
-
-                    }
-                    hasNextQuestion = false
-                    finish()
-                } else {
-
-                    if ((surveyResponse.document?.fields?.nextQuestion?.get(
-                            "mapValue"
-                        )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
-                            ?: "").lowercase() == "end" || (surveyResponse.document?.fields?.nextQuestion?.get(
-                            "mapValue"
-                        )?.get("fields")?.get("any")?.get("stringValue") ?: "").lowercase() == "end"
-                    ) {
-                        hasNextQuestion = false
-                        finish()
-                    } else {
-                        val index =
-                            questionList!!.subList(questionId, (questionList ?: arrayListOf()).size)
-                                .indexOfFirst {
-                                    if ((surveyResponse.document?.fields?.nextQuestion?.get(
-                                            "mapValue"
-                                        )?.get("fields")?.get(checkForNextQuestion)
-                                            ?.get("stringValue") ?: "") != ""
-                                    ) {
-                                        BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![checkForNextQuestion]!!["stringValue"]
-                                    } else if (surveyResponse.document?.fields?.nextQuestion?.get(
-                                            "mapValue"
-                                        )?.get("fields")?.get("any") != null
-                                    ) {
-                                        BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document?.fields?.nextQuestion?.get(
-                                            "mapValue"
-                                        )?.get("fields")?.get("any")?.get("stringValue")
-                                    } else {
-                                        false
-                                    }
-                                }
-                        if (index != -1) {
-                            questionId += index
-                        } else {
-                            questionId++
-                        }
-                    }
-                    setUpUI()
                 }
-
             } else if ((questionList?.size ?: 0) - 1 > questionId) {
                 questionId++
                 setUpUI()
+            } else {
+                hasNextQuestion = false
+                finish()
             }
         }
         writeSurveyResponse(
             responseAnswer, surveyResponse, hasNextQuestion
         )
+    }
+
+    private fun checkSkipLogic(
+        surveyResponse: UserQuestionResponse,
+        checkForNextQuestion: String?,
+        isLastQuestion: Boolean = false
+    ): Boolean {
+        if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                "mapValue"
+            )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                ?: "").lowercase() == "in_app_survey"
+        ) {
+            val manager = ReviewManagerFactory.create(this)
+            val request = manager.requestReviewFlow()
+            request.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // We got the ReviewInfo object
+                    val reviewInfo = task.result
+                    val flow = manager.launchReviewFlow(this, reviewInfo)
+                    flow.addOnCompleteListener {
+                        // The flow has finished. The API does not indicate whether the user
+                        // reviewed or not, or even whether the review dialog was shown. Thus, no
+                        // matter the result, we continue our app flow.
+                    }
+                } else {
+                    // There was some problem, log or handle the error code.
+                    Log.e(TAG, "triggerSurvey: ${task.exception}")
+                }
+            }
+            return false
+        } else if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                "mapValue"
+            )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                ?: "").lowercase() == "babble_whatsapp_referral"
+        ) {
+            val indexOfSkipLogic =
+                (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
+                    ?: arrayListOf()).indexOfFirst {
+                    (it.mapValue?.fields?.respVal?.stringValue ?: "") == checkForNextQuestion
+                }
+            var referralText = (surveyResponse.document?.fields?.nextQuestion?.get(
+                "mapValue"
+            )?.get("fields")?.get(checkForNextQuestion)?.get("referral_text") ?: "")
+            if (indexOfSkipLogic != -1) {
+                referralText = (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
+                    ?: arrayListOf())[indexOfSkipLogic].mapValue?.fields?.referralText?.stringValue
+                    ?: ""
+            }
+            try {
+                val sendIntent = Intent()
+                sendIntent.action = Intent.ACTION_SEND
+                sendIntent.putExtra(Intent.EXTRA_TEXT, referralText)
+                sendIntent.type = "text/plain"
+                sendIntent.setPackage("com.whatsapp")
+                startActivity(sendIntent)
+            } catch (_: Exception) {
+
+            }
+            return false
+        } else {
+            if (isLastQuestion) {
+                return false
+            } else {
+                if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                        ?: "").lowercase() == "end" || (surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")?.get("any")?.get("stringValue") ?: "").lowercase() == "end"
+                ) {
+                    return false
+                } else {
+                    val index =
+                        questionList!!.subList(questionId, (questionList ?: arrayListOf()).size)
+                            .indexOfFirst {
+                                if ((surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue"
+                                    )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                                        ?: "") != ""
+                                ) {
+                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document!!.fields!!.nextQuestion!!["mapValue"]!!["fields"]!![checkForNextQuestion]!!["stringValue"]
+                                } else if (surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue"
+                                    )?.get("fields")?.get("any") != null
+                                ) {
+                                    BabbleSdkHelper.getIdFromStringPath(it.document?.name) == surveyResponse.document?.fields?.nextQuestion?.get(
+                                        "mapValue"
+                                    )?.get("fields")?.get("any")?.get("stringValue")
+                                } else {
+                                    false
+                                }
+                            }
+                    if (index != -1) {
+                        questionId += index
+                    } else {
+                        questionId++
+                    }
+                }
+                setUpUI()
+                return true
+            }
+        }
     }
 
     private fun writeSurveyResponse(

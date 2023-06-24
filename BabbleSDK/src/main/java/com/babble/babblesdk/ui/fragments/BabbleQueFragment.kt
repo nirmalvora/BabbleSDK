@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -70,9 +71,26 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                     LinearLayoutManager(activity)
                 }
             }
+
+        val marginToSet = if ((questionData.document?.fields?.questionTypeId?.integerValue
+                ?: "9") == "7" || (questionData.document?.fields?.questionTypeId?.integerValue
+                ?: "9") == "8"
+        ) {
+            20
+        } else {
+            0
+        }
+        val layoutRatingsNotLike =
+            binding.ratingsNotLike.layoutParams as RelativeLayout.LayoutParams
+        layoutRatingsNotLike.setMargins(marginToSet, 0, 0, 0)
+        binding.ratingsNotLike.layoutParams = layoutRatingsNotLike
+
+        val layoutParamsRatingsFullLike =
+            binding.ratingsFullLike.layoutParams as RelativeLayout.LayoutParams
+        layoutParamsRatingsFullLike.setMargins(0, 0, marginToSet, 0)
+        binding.ratingsFullLike.layoutParams = layoutParamsRatingsFullLike
         dashboardAdapter = BabbleSurveyAdapter(
-            requireActivity(),
-            questionData, this
+            requireActivity(), questionData, this
         )
         binding.surveyOptionsList.layoutManager = mLayoutManager
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
@@ -88,12 +106,11 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: UserQuestionResponse) =
-            BabbleQueFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(BabbleConstants.questionData, param1)
-                }
+        fun newInstance(param1: UserQuestionResponse) = BabbleQueFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(BabbleConstants.questionData, param1)
             }
+        }
     }
 
     override fun itemClicked(position: Int) {
@@ -135,8 +152,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                                     questionData
                                 )
                             }
-                        },
-                        500
+                        }, 500
                     )
                 } else {
                     surveyActivity!!.addUserResponse(questionData)
@@ -149,7 +165,24 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
                 } else {
                     questionData.selectedRating = (position + 1)
                 }
-                surveyActivity!!.addUserResponse(questionData)
+
+                val delay: Long = if ((questionData.document?.fields?.questionTypeId?.integerValue
+                        ?: "9") == "7" || (questionData.document?.fields?.questionTypeId?.integerValue
+                        ?: "9") == "8"
+                ) {
+                    500
+                } else {
+                    0
+                }
+                val timer = Timer()
+                timer.schedule(
+                    timerTask {
+                        requireActivity().runOnUiThread {
+                            surveyActivity!!.addUserResponse(questionData)
+                        }
+                    }, delay
+                )
+
             }
         }
         dashboardAdapter!!.notifyMyList(questionData)

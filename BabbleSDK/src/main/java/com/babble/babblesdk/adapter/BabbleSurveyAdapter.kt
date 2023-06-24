@@ -110,13 +110,12 @@ internal class BabbleSurveyAdapter(
                         ?: ""
                 (mcqHolder.title.parent as RelativeLayout).background =
                     ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
-                val gd =
-                    (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
+                val gd = (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
                 if ((surveyFields?.document?.fields?.correctAnswer?.stringValue
                         ?: "").isNotEmpty()
                 ) {
-                    val correctAnswer = surveyFields?.document?.fields?.correctAnswer?.stringValue
-                        ?: ""
+                    val correctAnswer =
+                        surveyFields?.document?.fields?.correctAnswer?.stringValue ?: ""
                     val selectedAnswer =
                         this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(
                             position
@@ -140,8 +139,7 @@ internal class BabbleSurveyAdapter(
                         } else {
                             gd.setColor(
                                 ContextCompat.getColor(
-                                    mContext,
-                                    R.color.new_theme_gray
+                                    mContext, R.color.new_theme_gray
                                 )
                             ) //R.color.new_theme_gray));
                             mcqHolder.title.setTextColor(
@@ -151,8 +149,7 @@ internal class BabbleSurveyAdapter(
                     } else {
                         gd.setColor(
                             ContextCompat.getColor(
-                                mContext,
-                                R.color.new_theme_gray
+                                mContext, R.color.new_theme_gray
                             )
                         ) //R.color.new_theme_gray));
                         mcqHolder.title.setTextColor(
@@ -172,8 +169,7 @@ internal class BabbleSurveyAdapter(
                             BabbleSDKController.getInstance(mContext)!!.themeColor =
                                 "#" + Integer.toHexString(
                                     ContextCompat.getColor(
-                                        mContext,
-                                        R.color.colorPrimaryDark
+                                        mContext, R.color.colorPrimaryDark
                                     )
                                 )
                             gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
@@ -184,8 +180,7 @@ internal class BabbleSurveyAdapter(
                     } else {
                         gd.setColor(
                             ContextCompat.getColor(
-                                mContext,
-                                R.color.new_theme_gray
+                                mContext, R.color.new_theme_gray
                             )
                         ) //R.color.new_theme_gray));
                         mcqHolder.title.setTextColor(
@@ -212,8 +207,7 @@ internal class BabbleSurveyAdapter(
                         BabbleSDKController.getInstance(mContext)!!.themeColor =
                             "#" + Integer.toHexString(
                                 ContextCompat.getColor(
-                                    mContext,
-                                    R.color.colorPrimaryDark
+                                    mContext, R.color.colorPrimaryDark
                                 )
                             )
                         gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
@@ -224,8 +218,7 @@ internal class BabbleSurveyAdapter(
                 } else {
                     gd.setColor(
                         ContextCompat.getColor(
-                            mContext,
-                            R.color.new_theme_gray
+                            mContext, R.color.new_theme_gray
                         )
                     ) //R.color.new_theme_gray));
                     ratingHolder.title.setTextColor(
@@ -259,18 +252,17 @@ internal class BabbleSurveyAdapter(
                 ratingsEmojiViewHolder.emoji.text = mContext.resources.getString(
                     emojis[position]
                 )
-                (ratingsEmojiViewHolder.emoji.parent
-                    .parent as BabbleDynamicSquare).setBackgroundResource(R.drawable.rounded_rectangle_unselected)
+                (ratingsEmojiViewHolder.emoji.parent.parent as BabbleDynamicSquare).setBackgroundResource(
+                    R.drawable.rounded_rectangle_unselected
+                )
                 val gdEmojis =
-                    (ratingsEmojiViewHolder.emoji.parent
-                        .parent as BabbleDynamicSquare).background as GradientDrawable
+                    (ratingsEmojiViewHolder.emoji.parent.parent as BabbleDynamicSquare).background as GradientDrawable
                 if (this.surveyFields?.selectedRating == (position + 1)) {
                     gdEmojis.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
                 } else {
                     gdEmojis.setColor(
                         BabbleSdkHelper.manipulateColor(
-                            Color.parseColor("#000000"),
-                            0.0f
+                            Color.parseColor("#000000"), 0.0f
                         )
                     )
                 }
