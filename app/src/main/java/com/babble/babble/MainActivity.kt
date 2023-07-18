@@ -16,9 +16,9 @@ internal class MainActivity : AppCompatActivity() {
         mapValue.put("testKey1", "testValue")
         mapValue.put("testKey2", "testValue")
         mapValue.put("testKey3", "testValue")
-        BabbleSDK.setCustomerId(customerId = "cust007", userDetails = mapValue)
+        BabbleSDK.setCustomerId(customerId = "fintech4", userDetails = mapValue)
         binding.openSurvey.setOnClickListener {
-            BabbleSDK.triggerSurvey(trigger = "new-question-type", properties = mapValue)
+            BabbleSDK.triggerSurvey(trigger = "fintech4", properties = mapValue)
         }
         binding.cancelButton.setOnClickListener {
             BabbleSDK.cancelSurvey()
