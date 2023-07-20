@@ -273,16 +273,16 @@ class SurveyActivity : AppCompatActivity() {
     ) {
         var hasNextQuestion = true
         if (questionId == (questionList?.size ?: 0) - 1) {
-            if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
+            hasNextQuestion = if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
                     "mapValue"
                 )?.get("fields")
                     ?.get(checkForNextQuestion) != null || surveyResponse.document?.fields?.nextQuestion?.get(
                     "mapValue"
                 )?.get("fields")?.get("any") != null)
             ) {
-                hasNextQuestion = checkSkipLogic(surveyResponse, checkForNextQuestion, true)
+                checkSkipLogic(surveyResponse, checkForNextQuestion, true)
             } else {
-                hasNextQuestion = false
+                false
             }
             finish()
         } else {
