@@ -54,4 +54,10 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.4.0"
+    implementation("com.google.android.play:review:2.0.1") {
+        exclude group: 'com.google.android.play', module: 'core'
+    }
+    implementation("com.google.android.play:review-ktx:2.0.1") {
+        exclude group: 'com.google.android.play', module: 'core'
+    }
 }
