@@ -45,14 +45,14 @@ internal object BabbleSdkHelper {
     }
 
     fun getCurrentDate(): String {
-        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).format(
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(
             Date()
         )
     }
 
     fun convertStringToDate(date:String?): Date? {
         return date?.let {
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.getDefault()).parse(
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(
                 it
             )
         }

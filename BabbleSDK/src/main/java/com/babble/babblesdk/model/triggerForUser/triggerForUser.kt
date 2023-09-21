@@ -24,7 +24,7 @@ data class UserTriggerFields (
 
     @SerializedName("last_updated_at" ) var lastUpdatedAt : UserTriggerString? = UserTriggerString(),
     @SerializedName("status"          ) var status        : UserTriggerString?        = UserTriggerString(),
-    @SerializedName("platform"        ) var platform      : Platform?      = Platform(),
+//    @SerializedName("platform"        ) var platform      : Platform?      = Platform(),
     @SerializedName("user_id"         ) var userId        : UserTriggerString?        = UserTriggerString(),
     @SerializedName("description"     ) var description   : UserTriggerString?   = UserTriggerString(),
     @SerializedName("created_at"      ) var createdAt     : UserTriggerString?     = UserTriggerString(),

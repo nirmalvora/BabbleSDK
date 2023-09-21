@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ApiClient {
-    private const val baseUrl = "https://babble-app-api-e56ea46dbbcb.herokuapp.com/"
+    private const val baseUrl = "http://157.245.106.27:8091/api/"
     fun getInstance(): Retrofit {
         return Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
