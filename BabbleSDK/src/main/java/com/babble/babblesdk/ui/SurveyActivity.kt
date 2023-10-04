@@ -267,7 +267,6 @@ class SurveyActivity : AppCompatActivity() {
         if (questionTypeId != "9" && questionTypeId != "6") {
             selectedAnswers?.add(surveyResponse!!)
         }
-        Log.e(TAG, "addUserResponse: ")
         setNextQuestion(surveyResponse!!, responseForNextQuestion, responseAnswer)
     }
 
