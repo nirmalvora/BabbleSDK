@@ -197,12 +197,14 @@ class SurveyActivity : AppCompatActivity() {
             frag = when (questionList!![questionId].document?.fields?.questionTypeId?.integerValue
                 ?: "9") {
                 "6", "9" -> {
-                    var correctAnswerCount: Int? = null
+                    var correctAnswerCount = 0
                     if (surveyData?.document?.fields?.isQuiz?.booleanValue == true) {
                         correctAnswerCount = 0
                         selectedAnswers?.forEach { it ->
                             val responseAnswer = it.selectedOptions.joinToString { it }
-                            if (it.document?.fields?.correctAnswer?.stringValue == responseAnswer) correctAnswerCount++
+                            if (it.document?.fields?.correctAnswer?.stringValue == responseAnswer) {
+                                correctAnswerCount += 1
+                            }
                         }
                     }
                     BabbleWelcomeFragment.newInstance(
@@ -262,7 +264,10 @@ class SurveyActivity : AppCompatActivity() {
                 responseForNextQuestion = responseAnswer
             }
         }
-        selectedAnswers?.add(surveyResponse!!)
+        if (questionTypeId != "9" && questionTypeId != "6") {
+            selectedAnswers?.add(surveyResponse!!)
+        }
+        Log.e(TAG, "addUserResponse: ")
         setNextQuestion(surveyResponse!!, responseForNextQuestion, responseAnswer)
     }
 
@@ -273,17 +278,18 @@ class SurveyActivity : AppCompatActivity() {
     ) {
         var hasNextQuestion = true
         if (questionId == (questionList?.size ?: 0) - 1) {
-            hasNextQuestion = if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
-                    "mapValue"
-                )?.get("fields")
-                    ?.get(checkForNextQuestion) != null || surveyResponse.document?.fields?.nextQuestion?.get(
-                    "mapValue"
-                )?.get("fields")?.get("any") != null)
-            ) {
-                checkSkipLogic(surveyResponse, checkForNextQuestion, true)
-            } else {
-                false
-            }
+            hasNextQuestion =
+                if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")
+                        ?.get(checkForNextQuestion) != null || surveyResponse.document?.fields?.nextQuestion?.get(
+                        "mapValue"
+                    )?.get("fields")?.get("any") != null)
+                ) {
+                    checkSkipLogic(surveyResponse, checkForNextQuestion, true)
+                } else {
+                    false
+                }
             finish()
         } else {
             if (surveyResponse.document?.fields?.nextQuestion != null && (surveyResponse.document?.fields?.nextQuestion?.get(
@@ -318,7 +324,9 @@ class SurveyActivity : AppCompatActivity() {
         if ((surveyResponse.document?.fields?.nextQuestion?.get(
                 "mapValue"
             )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
-                ?: "").lowercase() == "in_app_survey"
+                ?: "").lowercase() == "in_app_survey" || (surveyResponse.document?.fields?.nextQuestion?.get(
+                "mapValue"
+            )?.get("fields")?.get("any")?.get("stringValue") ?: "").lowercase() == "in_app_survey"
         ) {
             val manager = ReviewManagerFactory.create(this)
             val request = manager.requestReviewFlow()
@@ -341,6 +349,9 @@ class SurveyActivity : AppCompatActivity() {
         } else if ((surveyResponse.document?.fields?.nextQuestion?.get(
                 "mapValue"
             )?.get("fields")?.get(checkForNextQuestion)?.get("stringValue")
+                ?: "").lowercase() == "babble_whatsapp_referral" || (surveyResponse.document?.fields?.nextQuestion?.get(
+                "mapValue"
+            )?.get("fields")?.get("any")?.get("stringValue")
                 ?: "").lowercase() == "babble_whatsapp_referral"
         ) {
             val indexOfSkipLogic =

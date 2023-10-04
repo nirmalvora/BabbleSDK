@@ -11,9 +11,12 @@ import androidx.fragment.app.FragmentActivity
 import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
 import com.babble.babblesdk.TAG
+import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 internal object BabbleSdkHelper {
     fun initializationFailed() {
@@ -44,7 +47,14 @@ internal object BabbleSdkHelper {
         Log.e(TAG, "Sampling fail")
     }
 
-    fun getCurrentDate(): String {
+    fun getCurrentDate(useGMT:Boolean = false): String {
+        if(useGMT) {
+            val cal: Calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
+            val currentLocalTime: Date = cal.getTime()
+            val date: DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            date.timeZone = TimeZone.getTimeZone("GMT")
+            return date.format(currentLocalTime);
+        }
         return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(
             Date()
         )

@@ -120,6 +120,7 @@ internal class BabbleSDKController(context: Context) {
                     call: Call<List<CohortResponse>>,
                     response: Response<List<CohortResponse>>,
                 ) {
+                    Log.e(TAG, "onResponse: ${response.body()?.size}", )
                     cohortIds =
                         response.body()
                             ?.map { getIdFromStringPath(it.document?.name) ?: "" }
@@ -218,7 +219,7 @@ internal class BabbleSDKController(context: Context) {
                         val eventList = backendEvents?.filter {
                             val date: Date? =
                                 convertStringToDate(it.document?.fields?.createdAt?.stringValue)
-                            val currentDate: Date = convertStringToDate(getCurrentDate())!!
+                            val currentDate: Date = convertStringToDate(getCurrentDate(true))!!
                             val calendar = Calendar.getInstance()
                             var dateCheck = false
                             if (date != null && survey.document?.fields?.relevancePeriod?.stringValue != null && (survey.document?.fields?.relevancePeriod?.stringValue

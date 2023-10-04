@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ApiClient {
-    private const val baseUrl = "http://157.245.106.27:8091/api/"
+    private const val baseUrl = "https://v2.usebabble.com/api/"
     fun getInstance(): Retrofit {
         return Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
