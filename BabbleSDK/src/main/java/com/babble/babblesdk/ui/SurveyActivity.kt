@@ -353,7 +353,7 @@ class SurveyActivity : AppCompatActivity() {
             )?.get("fields")?.get("any")?.get("stringValue")
                 ?: "").lowercase() == "babble_whatsapp_referral"
         ) {
-            val indexOfSkipLogic =
+            var indexOfSkipLogic =
                 (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
                     ?: arrayListOf()).indexOfFirst {
                     (it.mapValue?.fields?.respVal?.stringValue ?: "") == checkForNextQuestion
@@ -361,6 +361,15 @@ class SurveyActivity : AppCompatActivity() {
             var referralText = (surveyResponse.document?.fields?.nextQuestion?.get(
                 "mapValue"
             )?.get("fields")?.get(checkForNextQuestion)?.get("referral_text") ?: "")
+            if (indexOfSkipLogic == -1) {
+                indexOfSkipLogic =
+                    (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
+                        ?: arrayListOf()).indexOfFirst {
+                        (it.mapValue?.fields?.respVal?.stringValue
+                            ?: "") == "Any" || (it.mapValue?.fields?.respVal?.stringValue
+                            ?: "") == "any"
+                    }
+            }
             if (indexOfSkipLogic != -1) {
                 referralText = (surveyResponse.document?.fields?.skipLogicData?.arrayValue?.values
                     ?: arrayListOf())[indexOfSkipLogic].mapValue?.fields?.referralText?.stringValue
