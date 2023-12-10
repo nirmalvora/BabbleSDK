@@ -1,7 +1,6 @@
 package com.babble.babblesdk.adapter
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,7 @@ import com.babble.babblesdk.R
 import com.babble.babblesdk.customWidgets.BabbleDynamicSquare
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
-import com.babble.babblesdk.utils.BabbleSdkHelper
+import com.babble.babblesdk.utils.BabbleStyleHelper
 
 internal class BabbleSurveyAdapter(
     mContext: Context,
@@ -108,8 +107,10 @@ internal class BabbleSurveyAdapter(
                 mcqHolder.title.text =
                     this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(position)?.stringValue
                         ?: ""
+
                 (mcqHolder.title.parent as RelativeLayout).background =
                     ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
+
                 val gd = (mcqHolder.title.parent as RelativeLayout).background as GradientDrawable
                 if ((surveyFields?.document?.fields?.correctAnswer?.stringValue
                         ?: "").isNotEmpty()
@@ -122,71 +123,36 @@ internal class BabbleSurveyAdapter(
                         )?.stringValue ?: ""
 
                     if ((this.surveyFields?.selectedOptions ?: arrayListOf()).isNotEmpty()) {
-                        if (correctAnswer == (this.surveyFields?.selectedOptions
-                                ?: arrayListOf())[0] && correctAnswer == selectedAnswer || correctAnswer == selectedAnswer
-                        ) {
-                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.greenColor))
-                            mcqHolder.title.setTextColor(
-                                ContextCompat.getColor(mContext, R.color.white)
-                            )
-                        } else if ((this.surveyFields?.selectedOptions
-                                ?: arrayListOf())[0] == selectedAnswer
-                        ) {
-                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.redColor))
-                            mcqHolder.title.setTextColor(
-                                ContextCompat.getColor(mContext, R.color.white)
-                            )
-                        } else {
-                            gd.setColor(
-                                ContextCompat.getColor(
-                                    mContext, R.color.new_theme_gray
-                                )
-                            ) //R.color.new_theme_gray));
-                            mcqHolder.title.setTextColor(
-                                ContextCompat.getColor(mContext, R.color.txtblack)
-                            )
-                        }
-                    } else {
-                        gd.setColor(
-                            ContextCompat.getColor(
-                                mContext, R.color.new_theme_gray
-                            )
-                        ) //R.color.new_theme_gray));
-                        mcqHolder.title.setTextColor(
-                            ContextCompat.getColor(mContext, R.color.txtblack)
+                        val backgroundColor: Int =
+                            if (correctAnswer == (this.surveyFields?.selectedOptions
+                                    ?: arrayListOf())[0] && correctAnswer == selectedAnswer || correctAnswer == selectedAnswer
+                            ) {
+                                BabbleSDKController.getInstance(mContext)!!.greenColor
+                            } else if ((this.surveyFields?.selectedOptions
+                                    ?: arrayListOf())[0] == selectedAnswer
+                            ) {
+                                BabbleSDKController.getInstance(mContext)!!.redColor
+                            } else {
+                                BabbleSDKController.getInstance(mContext)!!.optionBackgroundColor
+                            }
+                        BabbleStyleHelper.setOptionSelected(
+                            gd,
+                            mcqHolder.title,
+                            (correctAnswer == (this.surveyFields?.selectedOptions
+                                ?: arrayListOf())[0] && correctAnswer == selectedAnswer || correctAnswer == selectedAnswer) || ((this.surveyFields?.selectedOptions
+                                ?: arrayListOf())[0] == selectedAnswer),
+                            backgroundColor
                         )
+
+                    } else {
+                        BabbleStyleHelper.setOptionSelected(gd,mcqHolder.title)
                     }
                 } else {
-                    if (this.surveyFields?.selectedOptions?.contains(
-                            this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(
-                                position
-                            )?.stringValue ?: ""
-                        ) == true
-                    ) {
-                        try {
-                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                        } catch (nfe: NumberFormatException) {
-                            BabbleSDKController.getInstance(mContext)!!.themeColor =
-                                "#" + Integer.toHexString(
-                                    ContextCompat.getColor(
-                                        mContext, R.color.colorPrimaryDark
-                                    )
-                                )
-                            gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                        }
-                        mcqHolder.title.setTextColor(
-                            ContextCompat.getColor(mContext, R.color.white)
-                        )
-                    } else {
-                        gd.setColor(
-                            ContextCompat.getColor(
-                                mContext, R.color.new_theme_gray
-                            )
-                        ) //R.color.new_theme_gray));
-                        mcqHolder.title.setTextColor(
-                            ContextCompat.getColor(mContext, R.color.txtblack)
-                        )
-                    }
+                    BabbleStyleHelper.setOptionSelected(gd,mcqHolder.title,this.surveyFields?.selectedOptions?.contains(
+                        this.surveyFields?.document?.fields?.answers?.arrayValue?.values?.get(
+                            position
+                        )?.stringValue ?: ""
+                    ) == true)
                 }
                 (mcqHolder.title.parent as RelativeLayout).setOnClickListener {
                     babbleClickHandler.itemClicked(position)
@@ -200,31 +166,7 @@ internal class BabbleSurveyAdapter(
                     ContextCompat.getDrawable(mContext, R.drawable.gray_rectangle_new_theme)
                 val gd =
                     (ratingHolder.title.parent as RelativeLayout).background as GradientDrawable
-                if (this.surveyFields?.selectedRating == (position + 1)) {
-                    try {
-                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                    } catch (nfe: NumberFormatException) {
-                        BabbleSDKController.getInstance(mContext)!!.themeColor =
-                            "#" + Integer.toHexString(
-                                ContextCompat.getColor(
-                                    mContext, R.color.colorPrimaryDark
-                                )
-                            )
-                        gd.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
-                    }
-                    ratingHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext, R.color.white)
-                    )
-                } else {
-                    gd.setColor(
-                        ContextCompat.getColor(
-                            mContext, R.color.new_theme_gray
-                        )
-                    ) //R.color.new_theme_gray));
-                    ratingHolder.title.setTextColor(
-                        ContextCompat.getColor(mContext, R.color.txtblack)
-                    )
-                }
+                BabbleStyleHelper.setOptionSelected(gd,ratingHolder.title,this.surveyFields?.selectedRating == (position + 1))
                 (ratingHolder.title.parent as RelativeLayout).setOnClickListener {
                     babbleClickHandler.itemClicked(position)
                 }
@@ -255,16 +197,18 @@ internal class BabbleSurveyAdapter(
                 (ratingsEmojiViewHolder.emoji.parent.parent as BabbleDynamicSquare).setBackgroundResource(
                     R.drawable.rounded_rectangle_unselected
                 )
+
                 val gdEmojis =
                     (ratingsEmojiViewHolder.emoji.parent.parent as BabbleDynamicSquare).background as GradientDrawable
                 if (this.surveyFields?.selectedRating == (position + 1)) {
-                    gdEmojis.setColor(Color.parseColor(BabbleSDKController.getInstance(mContext)!!.themeColor))
+                    gdEmojis.setColor(BabbleSDKController.getInstance(mContext)!!.themeColor)
                 } else {
                     gdEmojis.setColor(
-                        BabbleSdkHelper.manipulateColor(
-                            Color.parseColor("#000000"), 0.0f
+                        ContextCompat.getColor(
+                            mContext, R.color.full_transparancy
                         )
                     )
+
                 }
 
                 (ratingsEmojiViewHolder.emoji.parent as RelativeLayout).setOnClickListener {

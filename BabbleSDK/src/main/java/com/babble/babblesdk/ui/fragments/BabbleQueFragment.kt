@@ -14,7 +14,7 @@ import com.babble.babblesdk.databinding.FragmentBabbleQueBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleGenericClickHandler
-import com.babble.babblesdk.utils.BabbleSdkHelper
+import com.babble.babblesdk.utils.BabbleStyleHelper
 import java.util.Timer
 import kotlin.concurrent.timerTask
 
@@ -41,10 +41,17 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.btnLayout.nextButton.text = buttonText
         binding.surveyTitle.visibility = getVisibility(questionText)
         binding.surveySubTitle.visibility = getVisibility(questionDesc)
+        BabbleStyleHelper.setTextStyle(binding.surveyTitle)
+        BabbleStyleHelper.setTextStyle(binding.surveySubTitle)
         binding.btnLayout.nextButton.visibility = getVisibility(buttonText)
         binding.optionLayout.visibility = View.VISIBLE
         binding.ratingsFullLike.text = ratingsFullLike
         binding.ratingsNotLike.text = ratingsNotLike
+        BabbleStyleHelper.setLightTextColor(
+            binding.ratingsFullLike
+        )
+        BabbleStyleHelper.setLightTextColor(binding.ratingsNotLike)
+
         binding.ratingsFullLike.visibility = getVisibility(ratingsFullLike)
         binding.ratingsNotLike.visibility = getVisibility(ratingsNotLike)
         binding.btnLayout.nextButton.visibility = View.GONE
@@ -96,7 +103,7 @@ internal class BabbleQueFragment : BaseFragment(), BabbleGenericClickHandler {
         binding.surveyOptionsList.itemAnimator = DefaultItemAnimator()
         binding.surveyOptionsList.adapter = dashboardAdapter
 
-        BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
+        BabbleStyleHelper.submitButtonBeautification(binding.btnLayout.nextButton)
         return binding.root
     }
 

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +13,6 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.babble.babblesdk.BabbleSDKController
 import com.babble.babblesdk.R
@@ -34,6 +32,7 @@ import com.babble.babblesdk.ui.fragments.BabbleQueTextFragment
 import com.babble.babblesdk.ui.fragments.BabbleWelcomeFragment
 import com.babble.babblesdk.utils.BabbleConstants
 import com.babble.babblesdk.utils.BabbleSdkHelper
+import com.babble.babblesdk.utils.BabbleStyleHelper
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
 import okhttp3.ResponseBody
@@ -57,6 +56,7 @@ class SurveyActivity : AppCompatActivity() {
         binding = ActivitySurveyBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        BabbleStyleHelper.init(activity = this)
         setUpWindow()
         setUpData()
     }
@@ -100,18 +100,10 @@ class SurveyActivity : AppCompatActivity() {
 
 
         binding.pageProgressBar.max = (questionList?.size ?: 0) * 100
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                binding.pageProgressBar.progressTintList =
-                    ColorStateList.valueOf(Color.parseColor(BabbleSDKController.getInstance(this)!!.themeColor))
-            }
-        } catch (nfe: NumberFormatException) {
-            BabbleSDKController.getInstance(this)!!.themeColor =
-                "#" + Integer.toHexString(ContextCompat.getColor(this, R.color.colorPrimaryDark))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                binding.pageProgressBar.progressTintList =
-                    ColorStateList.valueOf(Color.parseColor(BabbleSDKController.getInstance(this)!!.themeColor))
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Log.e(TAG, "setUpData: ${surveyData?.document?.styles}")
+            binding.pageProgressBar.progressTintList =
+                ColorStateList.valueOf(BabbleSDKController.getInstance(this)!!.themeColor)
         }
         setUpUI()
         binding.closeBtnImageView.setOnClickListener {
@@ -121,6 +113,7 @@ class SurveyActivity : AppCompatActivity() {
     }
 
     private fun setUpWindow() {
+        binding.viewLayout.setBackgroundColor(BabbleSDKController.getInstance(this)!!.backgroundColor)
         val window = this.window
         val wlp = window.attributes
         wlp.gravity = Gravity.BOTTOM

@@ -22,6 +22,7 @@ internal open class BaseFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        questionData = requireArguments().getSerializable(BabbleConstants.questionData) as UserQuestionResponse
+        questionData =
+            requireArguments().getSerializable(BabbleConstants.questionData) as UserQuestionResponse
     }
 }

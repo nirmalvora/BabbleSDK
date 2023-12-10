@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import com.babble.babblesdk.databinding.FragmentBabbleQueTextBinding
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
 import com.babble.babblesdk.utils.BabbleConstants
-import com.babble.babblesdk.utils.BabbleSdkHelper
+import com.babble.babblesdk.utils.BabbleStyleHelper
 
 internal class BabbleQueTextFragment : BaseFragment() {
     private lateinit var binding: FragmentBabbleQueTextBinding
@@ -24,13 +24,17 @@ internal class BabbleQueTextFragment : BaseFragment() {
             questionData.answerText = binding.childUserInput.text.toString()
             surveyActivity!!.addUserResponse(questionData)
         }
+
         binding.surveyTitle.text = questionText
         binding.surveySubTitle.text = questionDesc
         binding.btnLayout.nextButton.text = buttonText
         binding.surveyTitle.visibility = getVisibility(questionText)
         binding.surveySubTitle.visibility = getVisibility(questionDesc)
         binding.btnLayout.nextButton.visibility = getVisibility(buttonText)
-        BabbleSdkHelper.submitButtonBeautification(requireActivity(), binding.btnLayout.nextButton)
+        BabbleStyleHelper.setEditTextColor(binding.childUserInput)
+        BabbleStyleHelper.setTextStyle(binding.surveyTitle)
+        BabbleStyleHelper.setTextStyle(binding.surveySubTitle)
+        BabbleStyleHelper.submitButtonBeautification(binding.btnLayout.nextButton)
         return binding.root
     }
 
@@ -40,12 +44,11 @@ internal class BabbleQueTextFragment : BaseFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: UserQuestionResponse) =
-            BabbleQueTextFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(BabbleConstants.questionData, param1)
-                }
+        fun newInstance(param1: UserQuestionResponse) = BabbleQueTextFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(BabbleConstants.questionData, param1)
             }
+        }
     }
 
 }

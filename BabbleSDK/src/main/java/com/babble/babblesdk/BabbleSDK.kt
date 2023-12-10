@@ -18,8 +18,7 @@ class BabbleSDK(activity: Context) {
         fun init(activity: Context, userId: String) {
             instance = BabbleSDK(activity)
             if (userId.isNotEmpty()) {
-                BabbleSDKController.getInstance(instance.activity!!)
-                    ?.init(userId)
+                BabbleSDKController.getInstance(instance.activity!!)?.init(userId)
             } else {
                 BabbleSdkHelper.initializationFailed()
             }
@@ -28,7 +27,7 @@ class BabbleSDK(activity: Context) {
         fun triggerSurvey(trigger: String, properties: HashMap<String, Any?>? = null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.trigger(trigger = trigger,properties = properties)
+                    ?.trigger(trigger = trigger, properties = properties)
             } else {
                 BabbleSdkHelper.notInitialized()
             }
@@ -36,8 +35,7 @@ class BabbleSDK(activity: Context) {
 
         fun cancelSurvey() {
             if (this::instance.isInitialized) {
-                BabbleSDKController.getInstance(instance.activity!!)
-                    ?.cancelSurvey()
+                BabbleSDKController.getInstance(instance.activity!!)?.cancelSurvey()
             } else {
                 BabbleSdkHelper.notInitialized()
             }
@@ -46,7 +44,7 @@ class BabbleSDK(activity: Context) {
         fun setCustomerId(customerId: String?, userDetails: HashMap<String, Any?>? = null) {
             if (this::instance.isInitialized) {
                 BabbleSDKController.getInstance(instance.activity!!)
-                    ?.setCustomerId(customerId = customerId,userDetails = userDetails)
+                    ?.setCustomerId(customerId = customerId, userDetails = userDetails)
             }
         }
     }

@@ -3,6 +3,7 @@ package com.babble.babblesdk
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import com.babble.babblesdk.model.CustomerPropertiesRequest
 import com.babble.babblesdk.model.EligibleSurveyRequest
@@ -11,7 +12,6 @@ import com.babble.babblesdk.model.SurveyInstanceRequest
 import com.babble.babblesdk.model.backendEventResponse.BackedEventResponse
 import com.babble.babblesdk.model.cohortResponse.CohortResponse
 import com.babble.babblesdk.model.questionsForUser.UserQuestionResponse
-import com.babble.babblesdk.model.styleForUserIdResponse.StyleForUserIdResponse
 import com.babble.babblesdk.model.surveyForUsers.UserSurveyResponse
 import com.babble.babblesdk.model.triggerForUser.UserTriggerResponse
 import com.babble.babblesdk.repository.ApiClient
@@ -38,9 +38,13 @@ internal class BabbleSDKController(context: Context) {
     private var mContext: Context? = context
     var userId: String? = null
     private var timer = Timer()
-    var themeColor: String = "#5D5FEF"
-    var greenColor: String = "#3eaa1c"
-    var redColor: String = "#FF0000"
+    var themeColor: Int = Color.parseColor("#5D5FEF")
+    var backgroundColor: Int = Color.parseColor("#5D5FEF")
+    var textColor: Int = Color.parseColor("#000000")
+    var textColorLight: Int = Color.parseColor("#000000")
+    var optionBackgroundColor: Int = Color.parseColor("#000000")
+    var greenColor: Int = Color.parseColor("#3eaa1c")
+    var redColor: Int = Color.parseColor("#FF0000")
     var surveyInstanceId: String? = null
     var cohortIds: List<String>? = null
     var backendEvents: List<BackedEventResponse>? = null
@@ -51,7 +55,6 @@ internal class BabbleSDKController(context: Context) {
     var userSurveyResponse: List<UserSurveyResponse>? = null
     var userTriggerResponse: List<UserTriggerResponse>? = null
     var userQuestionResponse: List<UserQuestionResponse>? = null
-    var styleForUserIdResponse: List<StyleForUserIdResponse>? = null
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -70,46 +73,38 @@ internal class BabbleSDKController(context: Context) {
             BabbleApiInterface::class.java
         )
 
-        disposable = Observable.zip(
-            babbleApi.getSurveyForUserId(this.userId),
+        disposable = Observable.zip(babbleApi.getSurveyForUserId(this.userId),
             babbleApi.getTriggerForUserId(this.userId),
             babbleApi.getQuestionForUserId(this.userId),
-            babbleApi.getStyleForUserId(this.userId),
             object :
-                Function4<List<UserSurveyResponse>, List<UserTriggerResponse>, List<UserQuestionResponse>, List<StyleForUserIdResponse>, Unit> {
+                Function3<List<UserSurveyResponse>, List<UserTriggerResponse>, List<UserQuestionResponse>, Unit> {
                 override fun invoke(
                     p1: List<UserSurveyResponse>,
                     p2: List<UserTriggerResponse>,
                     p3: List<UserQuestionResponse>,
-                    p4: List<StyleForUserIdResponse>,
                 ) {
                     userSurveyResponse = p1
                     userTriggerResponse = p2
                     userQuestionResponse = p3
-                    styleForUserIdResponse = p4
                 }
+            }).observeOn(AndroidSchedulers.mainThread()).doOnSubscribe { }.doOnTerminate { }
+            .subscribe({
+                this.isInitialize = true
+            }, {
+                BabbleSdkHelper.initializationFailed()
             })
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { }
-            .doOnTerminate { }
-            .subscribe(
-                {
-                    this.isInitialize = true
-                    if ((styleForUserIdResponse ?: arrayListOf()).isNotEmpty()) {
-                        themeColor =
-                            styleForUserIdResponse?.get(0)?.document?.fields?.mainColor?.stringValue
-                                ?: "#5D5FEF"
-                    }
-                },
-                {
-                    BabbleSdkHelper.initializationFailed()
-                }
-            )
     }
+
+    private val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
     // add properties
     fun setCustomerId(customerId: String?, userDetails: HashMap<String, Any?>? = null) {
-        this.babbleCustomerId = customerId ?: ""
+
+        this.babbleCustomerId = if (customerId != null && customerId != "") {
+            customerId
+        } else {
+            ("Anon" + (1..10).map { chars.random() }.joinToString(""))
+        }
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
@@ -121,8 +116,7 @@ internal class BabbleSDKController(context: Context) {
                     response: Response<List<CohortResponse>>,
                 ) {
                     cohortIds =
-                        response.body()
-                            ?.map { getIdFromStringPath(it.document?.name) ?: "" }
+                        response.body()?.map { getIdFromStringPath(it.document?.name) ?: "" }
                             ?: arrayListOf()
                 }
 
@@ -139,22 +133,21 @@ internal class BabbleSDKController(context: Context) {
                     customerId = this.babbleCustomerId,
                     properties = userDetails
                 )
-            )
-                .enqueue(object : Callback<ResponseBody> {
-                    override fun onResponse(
-                        call: Call<ResponseBody>,
-                        response: Response<ResponseBody>,
-                    ) {
-                    }
+            ).enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>,
+                ) {
+                }
 
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        Log.e(TAG, "createSurveyInstance: onFailure: $t")
-                    }
-                })
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.e(TAG, "createSurveyInstance: onFailure: $t")
+                }
+            })
         }
     }
 
-     fun getBEAndES() {
+    fun getBEAndES() {
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )
@@ -199,13 +192,15 @@ internal class BabbleSDKController(context: Context) {
             val surveyList = userSurveyResponse?.sortedByDescending {
                 val date: Date? = convertStringToDate(it.document?.fields?.createdAt?.stringValue)
                 date
-            }?.filter {  (it.document?.fields?.triggerId?.stringValue ?: "") == triggerId }
+            }?.filter { (it.document?.fields?.triggerId?.stringValue ?: "") == triggerId }
 
-            run breaking@ {
+            run breaking@{
                 surveyList?.forEach { survey ->
                     val surveyId = getIdFromStringPath(survey.document?.name)
                     val isEligibleSurvey =
-                        (eligibleSurveyResponse?.eligibleSurveyIds ?: arrayListOf()).contains(surveyId)
+                        (eligibleSurveyResponse?.eligibleSurveyIds ?: arrayListOf()).contains(
+                            surveyId
+                        )
                     if (isEligibleSurvey) {
                         val questionList = userQuestionResponse?.filter {
                             (it.document?.fields?.surveyId?.stringValue ?: "") == surveyId
@@ -226,8 +221,7 @@ internal class BabbleSDKController(context: Context) {
                             ) {
                                 calendar.time = date
                                 calendar.add(
-                                    Calendar.HOUR,
-                                    Integer.parseInt(
+                                    Calendar.HOUR, Integer.parseInt(
                                         survey.document?.fields?.relevancePeriod?.stringValue ?: "0"
                                     )
                                 )
@@ -247,20 +241,19 @@ internal class BabbleSDKController(context: Context) {
                             cohortId
                         ) == true)
 
-                        val eventCheck = eventName.isNullOrEmpty() || (eventList
-                            ?: arrayListOf()).isNotEmpty()
+                        val eventCheck =
+                            eventName.isNullOrEmpty() || (eventList ?: arrayListOf()).isNotEmpty()
 
 
-                        val showSurvey =
-                            !questionList.isNullOrEmpty() && cohortCheck && eventCheck
+                        val showSurvey = !questionList.isNullOrEmpty() && cohortCheck && eventCheck
 
                         if (showSurvey) {
                             val randomSample = (0..100).random()
                             val samplingValue = Integer.parseInt(
                                 survey.document?.fields?.samplingPercentage?.integerValue ?: "0"
                             )
-                            Log.e(TAG, "trigger: $randomSample  $samplingValue" )
-                            if( randomSample < samplingValue) {
+                            Log.e(TAG, "trigger: $randomSample  $samplingValue")
+                            if (randomSample < samplingValue) {
 
 
                                 timer = Timer()
@@ -271,23 +264,68 @@ internal class BabbleSDKController(context: Context) {
                                             eventList = eventList,
                                             properties = properties
                                         )
-                                        val surveyIntent =
-                                            Intent(mContext!!.applicationContext, SurveyActivity::class.java)
+                                        themeColor = try {
+                                            Color.parseColor(
+                                                survey.document?.styles?.brandColor ?: "#5D5FEF"
+                                            )
+                                        } catch (error: Exception) {
+                                            Color.parseColor("#5D5FEF")
+                                        }
+
+                                        textColor = try {
+                                            Color.parseColor(
+                                                survey.document?.styles?.textColor ?: "#000000"
+                                            )
+                                        } catch (error: Exception) {
+                                            Color.parseColor("#000000")
+                                        }
+
+                                        textColorLight = try {
+                                            Color.parseColor(
+                                                survey.document?.styles?.textColorLight ?: "#ffffff"
+                                            )
+                                        } catch (error: Exception) {
+                                            Color.parseColor("#ffffff")
+                                        }
+
+                                        optionBackgroundColor = try {
+                                            Color.parseColor(
+                                                survey.document?.styles?.optionBgColor ?: "#5D5FEF"
+                                            )
+                                        } catch (error: Exception) {
+                                            Color.parseColor("#5D5FEF")
+                                        }
+
+                                        backgroundColor = try {
+                                            Color.parseColor(
+                                                survey.document?.styles?.backgroundColor
+                                                    ?: "#5D5FEF"
+                                            )
+                                        } catch (error: Exception) {
+                                            Color.parseColor("#5D5FEF")
+                                        }
+
+                                        val surveyIntent = Intent(
+                                            mContext!!.applicationContext,
+                                            SurveyActivity::class.java
+                                        )
                                         surveyIntent.putExtra(
-                                            BabbleConstants.surveyDetail, Gson().toJson(questionList)
+                                            BabbleConstants.surveyDetail,
+                                            Gson().toJson(questionList)
                                         )
                                         surveyIntent.putExtra(
                                             BabbleConstants.survey, Gson().toJson(survey)
                                         )
                                         surveyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        surveyIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                        surveyIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                         mContext?.applicationContext?.startActivity(surveyIntent)
-                                    },
-                                    (Integer.parseInt(
+                                    }, (Integer.parseInt(
                                         survey.document?.fields?.triggerDelay?.integerValue ?: "0"
                                     ) * 1000).toLong()
                                 )
                                 return@breaking
-                            }else{
+                            } else {
                                 BabbleSdkHelper.samplingFail()
                             }
                         } else {
@@ -331,8 +369,7 @@ internal class BabbleSDKController(context: Context) {
         properties: HashMap<String, Any?>?,
     ) {
         surveyInstanceId = BabbleSdkHelper.getRandomString(10)
-        val surveyInstanceRequest = SurveyInstanceRequest(
-            customerId = this.babbleCustomerId,
+        val surveyInstanceRequest = SurveyInstanceRequest(customerId = this.babbleCustomerId,
             surveyId = surveyId,
             timeVal = getCurrentDate(),
             userId = this.userId,
@@ -342,8 +379,7 @@ internal class BabbleSDKController(context: Context) {
             properties = properties,
             devicePlatform = "Android",
             type = "Mobile-app",
-            device_type = "Mobile"
-        )
+            device_type = "Mobile")
         val babbleApi: BabbleApiInterface = ApiClient.getInstance().create(
             BabbleApiInterface::class.java
         )

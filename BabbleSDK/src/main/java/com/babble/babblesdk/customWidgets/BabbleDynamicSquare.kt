@@ -7,9 +7,7 @@ import android.widget.RelativeLayout
 internal class BabbleDynamicSquare : RelativeLayout {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(
-        context,
-        attrs,
-        defStyle
+        context, attrs, defStyle
     )
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)

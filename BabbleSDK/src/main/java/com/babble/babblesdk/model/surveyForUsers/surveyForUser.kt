@@ -17,7 +17,8 @@ data class UserSurveyDocument(
     @SerializedName("name") var name: String? = null,
     @SerializedName("fields") var fields: UserSurveyFields? = UserSurveyFields(),
     @SerializedName("createTime") var createTime: String? = null,
-    @SerializedName("updateTime") var updateTime: String? = null
+    @SerializedName("updateTime") var updateTime: String? = null,
+    @SerializedName("styles") var styles: Styles? = Styles()
 
 ) : Serializable
 
@@ -52,3 +53,13 @@ data class UserSurveyInteger(
     @SerializedName("integerValue") var integerValue: String? = null
 
 ) : Serializable
+
+data class Styles(
+
+    @SerializedName("brand_color") var brandColor: String? = null,
+    @SerializedName("background_color") var backgroundColor: String? = null,
+    @SerializedName("text_color") var textColor: String? = null,
+    @SerializedName("text_color_light") var textColorLight: String? = null,
+    @SerializedName("option_bg_color") var optionBgColor: String? = null
+
+)

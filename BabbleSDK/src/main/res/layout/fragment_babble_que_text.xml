@@ -42,22 +42,28 @@
             android:layout_margin="@dimen/field_padding"
             android:background="@drawable/gray_rectangle_withborder"
             android:minHeight="100dp">
+
             <EditText
                 android:id="@+id/child_user_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:textColor="@color/txtblack"
+                android:layout_marginStart="1dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginBottom="1dp"
                 android:background="@color/full_transparancy"
                 android:gravity="top|left"
                 android:hint="Type here"
-                android:textColorHint="@color/txtlightgray"
                 android:inputType="textMultiLine"
                 android:isScrollContainer="false"
-                android:minHeight="100dp"
                 android:maxHeight="150dp"
+                android:minHeight="100dp"
                 android:padding="@dimen/field_padding"
-                android:textSize="@dimen/page_sub_header_3"/>
+                android:textColor="@color/txtblack"
+                android:textColorHint="@color/txtlightgray"
+                android:textSize="@dimen/page_sub_header_3" />
         </RelativeLayout>
 
         <include
